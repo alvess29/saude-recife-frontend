@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Saúde Recife - Pre-triagem e Agendamento</title>
+<meta name="description" content="Agende consultas em clinicas parceiras de Recife com pre-triagem simples e acessivel." />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B5D5D" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="marca" href="./index.html">
+      <span class="marca-selo" aria-hidden="true">SR</span>
+      Saúde Recife
+    </a>
+  </div>
+</header>
+
+<main id="conteudo-principal">
+  <div class="container">
+
+    <section class="hero">
+      <h1>Marque sua consulta sem sair de casa</h1>
+      <p>Encontre clinicas parceiras em Recife, escolha o profissional e o horario que combinam com voce, com uma experiencia pensada para ser simples e acessivel.</p>
+      <div class="hero-acoes">
+        <a class="btn btn-acento" href="#login">Ja tenho conta</a>
+        <a class="btn btn-secundario" style="background:transparent;border-color:rgba(255,255,255,0.5);color:#fff" href="cadastro.html">Criar conta de paciente</a>
+      </div>
+    </section>
+
+    <div class="auth-layout" id="login">
+      <div class="cartao cartao-estreito">
+        <h2>Entrar</h2>
+        <p style="margin-bottom:1.25rem;color:var(--cor-texto-suave);font-size:0.94rem;">
+          Pacientes, profissionais de saúde e administradores usam o mesmo acesso.
+        </p>
+
+        <div class="alerta alerta-erro" id="alerta-login" role="alert"></div>
+
+        <form id="form-login" novalidate>
+          <div class="campo">
+            <label for="email">E-mail ou CPF</label>
+            <input type="text" id="email" name="email" autocomplete="username" required />
+          </div>
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" autocomplete="current-password" required minlength="6" />
+          </div>
+          <button type="submit" class="btn btn-primario btn-bloco" id="btn-login">Entrar</button>
+        </form>
+
+        <p class="link-alternar">
+          Ainda nao tem conta? <a href="cadastro.html">Cadastre-se como paciente</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<p class="rodape">Projeto Integrador &middot; Saúde na Palma da Mao &middot; Senac PE</p>
+
+<script type="module" src="js/login.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>

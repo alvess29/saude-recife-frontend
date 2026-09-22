@@ -1,0 +1,14 @@
+{
+  "name": "Saúde Recife - Triagem e Agendamento",
+  "short_name": "Saúde Recife",
+  "description": "Pre-triagem e agendamento de consultas em clinicas parceiras de Recife.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F7F6",
+  "theme_color": "#0B5D5D",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

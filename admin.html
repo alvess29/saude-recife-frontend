@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Painel administrativo - Saúde Recife</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B5D5D" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="marca" href="./admin.html"><span class="marca-selo" aria-hidden="true">SR</span> Saúde Recife</a>
+    <div class="nav-usuario">
+      <span><strong data-usuario-nome>...</strong> &middot; <span data-usuario-tipo></span></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao-sair type="button">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo-principal">
+  <div class="container">
+    <div class="pagina-cabecalho">
+      <h1>Painel administrativo</h1>
+      <p>Gerencie clinicas, profissionais, especialidades, contas de acesso e agendamentos.</p>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button class="aba-btn ativa" data-aba="clinicas" role="tab">Clinicas</button>
+      <button class="aba-btn" data-aba="profissionais" role="tab">Profissionais</button>
+      <button class="aba-btn" data-aba="especialidades" role="tab">Especialidades</button>
+      <button class="aba-btn" data-aba="pacientes" role="tab">Pacientes</button>
+      <button class="aba-btn" data-aba="equipe" role="tab">Contas da equipe</button>
+      <button class="aba-btn" data-aba="agendamentos" role="tab">Agendamentos</button>
+    </div>
+
+    
+    <section class="painel-aba ativa" id="painel-clinicas">
+      <div class="cartao">
+        <h3>Nova clinica</h3>
+        <div class="alerta" id="alerta-clinica" role="alert"></div>
+        <form id="form-clinica">
+          <div class="linha-campos">
+            <div class="campo"><label for="c-nome">Nome</label><input type="text" id="c-nome" required /></div>
+            <div class="campo"><label for="c-cnpj">CNPJ</label><input type="text" id="c-cnpj" required /></div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="c-telefone">Telefone</label><input type="tel" id="c-telefone" required /></div>
+            <div class="campo"><label for="c-email">E-mail</label><input type="email" id="c-email" required /></div>
+          </div>
+          <div class="campo"><label for="c-endereco">Endereco</label><input type="text" id="c-endereco" required /></div>
+          <div class="linha-campos">
+            <div class="campo"><label for="c-horario">Horario de funcionamento</label><input type="text" id="c-horario" placeholder="Seg a Sex, 7h as 19h" /></div>
+            <div class="campo">
+              <label for="c-especialidades">Especialidades atendidas</label>
+              <select id="c-especialidades" multiple size="4"></select>
+              <p class="ajuda">Segure Ctrl/Cmd para marcar mais de uma.</p>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primario">Cadastrar clinica</button>
+        </form>
+      </div>
+      <div class="cartao">
+        <h3>Clinicas cadastradas</h3>
+        <div id="lista-clinicas"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-profissionais">
+      <div class="cartao">
+        <h3>Novo profissional de saúde</h3>
+        <div class="alerta" id="alerta-profissional" role="alert"></div>
+        <form id="form-profissional">
+          <div class="linha-campos">
+            <div class="campo"><label for="p-nome">Nome</label><input type="text" id="p-nome" required /></div>
+            <div class="campo"><label for="p-cpf">CPF</label><input type="text" id="p-cpf" required /></div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="p-registro">Registro profissional</label><input type="text" id="p-registro" required placeholder="Ex: CRM 12345" /></div>
+            <div class="campo"><label for="p-conselho">Conselho</label><input type="text" id="p-conselho" required placeholder="CRM, CRO, COREN..." /></div>
+            <div class="campo"><label for="p-uf">UF do registro</label><input type="text" id="p-uf" maxlength="2" placeholder="PE" /></div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="p-telefone">Telefone</label><input type="tel" id="p-telefone" /></div>
+            <div class="campo"><label for="p-email">E-mail</label><input type="email" id="p-email" /></div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="p-especialidades">Especialidades</label>
+              <select id="p-especialidades" multiple size="4"></select>
+              <p class="ajuda">Segure Ctrl/Cmd para marcar mais de uma.</p>
+            </div>
+            <div class="campo">
+              <label for="p-clinicas">Clinicas onde atende</label>
+              <select id="p-clinicas" multiple size="4"></select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primario">Cadastrar profissional</button>
+        </form>
+      </div>
+      <div class="cartao">
+        <h3>Profissionais cadastrados</h3>
+        <div id="lista-profissionais"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-especialidades">
+      <div class="cartao">
+        <h3>Nova especialidade</h3>
+        <div class="alerta" id="alerta-especialidade" role="alert"></div>
+        <form id="form-especialidade">
+          <div class="linha-campos">
+            <div class="campo"><label for="e-nome">Nome</label><input type="text" id="e-nome" required /></div>
+            <div class="campo"><label for="e-descricao">Descricao</label><input type="text" id="e-descricao" /></div>
+          </div>
+          <button type="submit" class="btn btn-primario">Cadastrar especialidade</button>
+        </form>
+      </div>
+      <div class="cartao">
+        <h3>Especialidades cadastradas</h3>
+        <div id="lista-especialidades"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-pacientes">
+      <div class="alerta" id="alerta-pacientes" role="alert"></div>
+      <div class="cartao">
+        <h3>Pacientes cadastrados</h3>
+        <p style="color:var(--cor-texto-suave);font-size:0.9rem;margin-top:-0.5rem;">Cadastro feito pelo proprio paciente em "Criar conta". Lista somente leitura.</p>
+        <div id="lista-pacientes"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-equipe">
+      <div class="cartao cartao-estreito">
+        <h3>Criar conta de acesso</h3>
+        <p style="color:var(--cor-texto-suave);font-size:0.9rem;">Use para dar login a um profissional ja cadastrado ou criar outro administrador.</p>
+        <div class="alerta" id="alerta-equipe" role="alert"></div>
+        <form id="form-equipe">
+          <div class="campo"><label for="q-nome">Nome</label><input type="text" id="q-nome" required /></div>
+          <div class="campo"><label for="q-email">E-mail</label><input type="email" id="q-email" required /></div>
+          <div class="campo"><label for="q-senha">Senha provisoria</label><input type="password" id="q-senha" required minlength="6" /></div>
+          <div class="campo">
+            <label for="q-tipo">Tipo de conta</label>
+            <select id="q-tipo">
+              <option value="profissional">Profissional de saúde</option>
+              <option value="administrador">Administrador</option>
+            </select>
+          </div>
+          <div class="campo" id="grupo-vinculo">
+            <label for="q-profissional">Vincular ao profissional</label>
+            <select id="q-profissional"></select>
+          </div>
+          <button type="submit" class="btn btn-primario btn-bloco">Criar conta</button>
+        </form>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-agendamentos">
+      <div class="alerta" id="alerta-agendamentos" role="alert"></div>
+      <div class="cartao">
+        <h3>Todos os agendamentos</h3>
+        <div id="lista-agendamentos-admin"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<template id="modelo-clinica">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao="alternar-status"></button>
+      <button class="btn btn-perigo btn-pequeno" data-acao="excluir">Excluir</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-profissional">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao="alternar-status"></button>
+      <button class="btn btn-perigo btn-pequeno" data-acao="excluir">Excluir</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-especialidade">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao="alternar-status"></button>
+      <button class="btn btn-perigo btn-pequeno" data-acao="excluir">Excluir</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-paciente">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-agendamento-admin">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="paciente"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <span class="selo" data-campo="selo"></span>
+  </div>
+</template>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

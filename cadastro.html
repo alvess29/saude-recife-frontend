@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Criar conta - Saúde Recife</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B5D5D" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="marca" href="./index.html"><span class="marca-selo" aria-hidden="true">SR</span> Saúde Recife</a>
+  </div>
+</header>
+
+<main id="conteudo-principal">
+  <div class="container">
+    <div class="auth-layout" style="max-width:520px;">
+      <div class="cartao">
+        <h1 style="font-size:1.5rem;">Criar conta de paciente</h1>
+        <p style="color:var(--cor-texto-suave);margin-bottom:1.25rem;">Leva menos de um minuto. Seus dados ficam protegidos e sao usados apenas para o seu atendimento.</p>
+
+        <div class="alerta alerta-erro" id="alerta-cadastro" role="alert"></div>
+
+        <form id="form-cadastro" novalidate>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="nome">Nome completo</label>
+              <input type="text" id="nome" required autocomplete="name" />
+            </div>
+            <div class="campo">
+              <label for="cpf">CPF</label>
+              <input type="text" id="cpf" required inputmode="numeric" placeholder="000.000.000-00" />
+            </div>
+          </div>
+
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="dataNascimento">Data de nascimento</label>
+              <input type="date" id="dataNascimento" />
+            </div>
+            <div class="campo">
+              <label for="sexo">Sexo</label>
+              <select id="sexo">
+                <option value="">Prefiro nao informar</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="telefone">Telefone</label>
+            <input type="tel" id="telefone" placeholder="(81) 99999-9999" autocomplete="tel" />
+          </div>
+
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required autocomplete="email" />
+          </div>
+
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" required minlength="6" autocomplete="new-password" />
+            <p class="ajuda">Minimo de 6 caracteres.</p>
+          </div>
+
+          <button type="submit" class="btn btn-primario btn-bloco" id="btn-cadastrar">Criar minha conta</button>
+        </form>
+
+        <p class="link-alternar">Ja tem conta? <a href="index.html#login">Entrar</a></p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="js/cadastro.js"></script>
+</body>
+</html>

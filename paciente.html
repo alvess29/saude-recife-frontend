@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Minha area - Saúde Recife</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B5D5D" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="marca" href="./paciente.html"><span class="marca-selo" aria-hidden="true">SR</span> Saúde Recife</a>
+    <div class="nav-usuario">
+      <span><strong data-usuario-nome>...</strong> &middot; <span data-usuario-tipo></span></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao-sair type="button">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo-principal">
+  <div class="container">
+    <div class="pagina-cabecalho">
+      <h1>Minha area</h1>
+      <p>Encontre um horario, agende sua consulta e acompanhe seus atendimentos.</p>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button class="aba-btn ativa" data-aba="agendar" role="tab">Agendar consulta</button>
+      <button class="aba-btn" data-aba="meus" role="tab">Meus agendamentos</button>
+      <button class="aba-btn" data-aba="perfil" role="tab">Meu perfil</button>
+    </div>
+
+    
+    <section class="painel-aba ativa" id="painel-agendar">
+      <div class="cartao">
+        <h3>Buscar profissionais</h3>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="busca-prof-nome">Nome</label>
+            <input type="text" id="busca-prof-nome" placeholder="Digite o nome..." />
+          </div>
+          <div class="campo">
+            <label for="filtro-especialidade">Especialidade</label>
+            <select id="filtro-especialidade"><option value="">Todas</option></select>
+          </div>
+          <div class="campo">
+            <label for="filtro-clinica">Clinica</label>
+            <select id="filtro-clinica"><option value="">Todas</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <h3>Resultado</h3>
+        <div id="lista-busca-profissionais"><p class="vazio">Carregando...</p></div>
+      </div>
+
+      <div class="alerta" id="alerta-agendar" role="alert"></div>
+
+      <div class="cartao" id="cartao-horarios">
+        <h3>Horarios disponiveis</h3>
+        <p class="ajuda" id="filtro-profissional-ativo" style="display:none;"></p>
+        <div id="lista-horarios">
+          <p class="vazio">Carregando horarios...</p>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-meus">
+      <div class="alerta" id="alerta-meus" role="alert"></div>
+      <div class="cartao">
+        <h3>Meus agendamentos</h3>
+        <div id="lista-agendamentos">
+          <p class="vazio">Carregando...</p>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="painel-aba" id="painel-perfil">
+      <div class="cartao cartao-estreito">
+        <h3>Meus dados</h3>
+        <div class="alerta" id="alerta-perfil" role="alert"></div>
+        <form id="form-perfil">
+          <div class="campo">
+            <label for="perfil-nome">Nome completo</label>
+            <input type="text" id="perfil-nome" />
+          </div>
+          <div class="campo">
+            <label for="perfil-telefone">Telefone</label>
+            <input type="tel" id="perfil-telefone" />
+          </div>
+          <div class="campo">
+            <label for="perfil-nascimento">Data de nascimento</label>
+            <input type="date" id="perfil-nascimento" />
+          </div>
+          <div class="campo">
+            <label for="perfil-observacoes">Observacoes de saúde (opcional)</label>
+            <textarea id="perfil-observacoes" placeholder="Alergias, condicoes relevantes, etc."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primario btn-bloco">Salvar alteracoes</button>
+        </form>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<template id="modelo-horario">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="profissional"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <button class="btn btn-acento btn-pequeno" data-acao="agendar">Agendar</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-agendamento">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="profissional"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-perigo btn-pequeno" data-acao="cancelar">Cancelar</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-busca-profissional">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <button class="btn btn-secundario btn-pequeno" data-acao="ver-horarios">Ver horarios</button>
+    </div>
+  </div>
+</template>
+
+<script type="module" src="js/paciente.js"></script>
+</body>
+</html>

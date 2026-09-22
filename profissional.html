@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Area do profissional - Saúde Recife</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0B5D5D" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="marca" href="./profissional.html"><span class="marca-selo" aria-hidden="true">SR</span> Saúde Recife</a>
+    <div class="nav-usuario">
+      <span><strong data-usuario-nome>...</strong> &middot; <span data-usuario-tipo></span></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao-sair type="button">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo-principal">
+  <div class="container">
+    <div class="pagina-cabecalho">
+      <h1>Area do profissional</h1>
+      <p>Cadastre seus horarios de atendimento e acompanhe sua agenda.</p>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button class="aba-btn ativa" data-aba="agenda" role="tab">Minha agenda</button>
+      <button class="aba-btn" data-aba="horarios" role="tab">Cadastrar horarios</button>
+    </div>
+
+    <section class="painel-aba ativa" id="painel-agenda">
+      <div class="alerta" id="alerta-agenda" role="alert"></div>
+      <div class="cartao">
+        <h3>Proximos atendimentos</h3>
+        <div id="lista-agenda"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    <section class="painel-aba" id="painel-horarios">
+      <div class="cartao">
+        <h3>Novo horario disponivel</h3>
+        <div class="alerta" id="alerta-horario" role="alert"></div>
+        <form id="form-horario">
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="h-clinica">Clinica</label>
+              <select id="h-clinica" required></select>
+            </div>
+            <div class="campo">
+              <label for="h-data">Data</label>
+              <input type="date" id="h-data" required />
+            </div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="h-inicio">Hora inicio</label>
+              <input type="time" id="h-inicio" required />
+            </div>
+            <div class="campo">
+              <label for="h-fim">Hora fim</label>
+              <input type="time" id="h-fim" required />
+            </div>
+            <div class="campo">
+              <label for="h-duracao">Duracao (min)</label>
+              <input type="number" id="h-duracao" value="30" min="10" step="5" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primario">Cadastrar horario</button>
+        </form>
+      </div>
+
+      <div class="cartao">
+        <h3>Meus horarios cadastrados</h3>
+        <div id="lista-horarios-profissional"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<template id="modelo-agenda-item">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="paciente"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <span class="selo" data-campo="selo"></span>
+  </div>
+</template>
+
+<template id="modelo-horario-item">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="data"></div>
+      <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-perigo btn-pequeno" data-acao="remover">Remover</button>
+    </div>
+  </div>
+</template>
+
+<script type="module" src="js/profissional.js"></script>
+</body>
+</html>
