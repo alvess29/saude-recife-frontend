@@ -46,11 +46,15 @@
     <section class="painel-aba" id="painel-horarios">
       <div class="cartao">
         <h3>Dias de atendimento</h3>
-        <p class="ajuda">Todos os dias do mês começam marcados. Clique em um dia para desmarcá-lo, depois defina o horário abaixo.</p>
+        <p class="ajuda">Todos os dias do mês começam marcados. Clique em um dia para desmarcá-lo ou use os botões para marcar ou desmarcar o mês inteiro, depois defina o horário abaixo.</p>
         <div class="calendario-nav">
           <button type="button" class="btn btn-secundario btn-pequeno" id="btn-mes-anterior" aria-label="Mês anterior">&lsaquo;</button>
           <strong id="calendario-titulo"></strong>
           <button type="button" class="btn btn-secundario btn-pequeno" id="btn-mes-seguinte" aria-label="Próximo mês">&rsaquo;</button>
+        </div>
+        <div class="calendario-acoes">
+          <button type="button" class="btn btn-secundario btn-pequeno" id="btn-marcar-tudo">Marcar tudo</button>
+          <button type="button" class="btn btn-secundario btn-pequeno" id="btn-desmarcar-tudo">Desmarcar tudo</button>
         </div>
         <table class="calendario">
           <thead>
@@ -91,29 +95,6 @@
       </div>
 
       <div class="cartao">
-        <h3>Ajustar o horário de um dia</h3>
-        <p class="ajuda">Vai sair mais cedo ou chegar mais tarde em um dia específico? Informe a data e o novo horário. Os horários livres fora dele são removidos.</p>
-        <div class="alerta" id="alerta-ajuste" role="alert"></div>
-        <form id="form-ajuste">
-          <div class="linha-campos">
-            <div class="campo">
-              <label for="aj-data">Data</label>
-              <input type="date" id="aj-data" required />
-            </div>
-            <div class="campo">
-              <label for="aj-inicio">Novo início (opcional)</label>
-              <input type="time" id="aj-inicio" />
-            </div>
-            <div class="campo">
-              <label for="aj-fim">Novo fim (opcional)</label>
-              <input type="time" id="aj-fim" />
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primario">Ajustar horário do dia</button>
-        </form>
-      </div>
-
-      <div class="cartao">
         <h3>Meus horários cadastrados</h3>
         <div id="lista-horarios-profissional"><p class="vazio">Carregando...</p></div>
       </div>
@@ -131,16 +112,28 @@
   </div>
 </template>
 
-<template id="modelo-horario-item">
-  <div class="item-lista">
-    <div>
-      <div class="item-lista-titulo" data-campo="data"></div>
-      <div class="item-lista-meta" data-campo="detalhes"></div>
-    </div>
-    <div class="item-lista-acoes">
-      <span class="selo" data-campo="selo"></span>
-      <button class="btn btn-perigo btn-pequeno" data-acao="remover">Remover</button>
-    </div>
+<template id="modelo-dia-horarios">
+  <details class="grupo-dia">
+    <summary class="grupo-dia-cabecalho">
+      <div>
+        <div class="item-lista-titulo grupo-dia-titulo">
+          <span data-campo="dia"></span> <span class="grupo-dia-semana" data-campo="semana"></span>
+        </div>
+        <div class="item-lista-meta" data-campo="detalhes"></div>
+      </div>
+      <div class="grupo-dia-resumo">
+        <span class="selo selo-disponivel" data-campo="disponiveis"></span>
+        <span class="selo selo-reservado" data-campo="reservados"></span>
+      </div>
+    </summary>
+    <div class="grupo-dia-horarios" data-campo="horarios"></div>
+  </details>
+</template>
+
+<template id="modelo-horario-chip">
+  <div class="horario-chip">
+    <span data-campo="hora"></span>
+    <button type="button" class="horario-chip-remover" data-acao="remover">&times;</button>
   </div>
 </template>
 

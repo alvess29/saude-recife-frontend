@@ -19,10 +19,7 @@ async function chamar(caminho, { metodo = 'GET', corpo, autenticado = true } = {
 
   if (!resposta.ok) {
     const mensagem = dados.erro || `Erro na requisicao (HTTP ${resposta.status}).`;
-    const erro = new Error(mensagem);
-    erro.status = resposta.status;
-    erro.dados = dados;
-    throw erro;
+    throw new Error(mensagem);
   }
   return dados;
 }
@@ -67,7 +64,6 @@ export const api = {
   criarDisponibilidade: (dados) => chamar('/disponibilidades', { metodo: 'POST', corpo: dados }),
   criarDisponibilidadesEmLote: (dados) => chamar('/disponibilidades/lote', { metodo: 'POST', corpo: dados }),
   conversarTriagem: (mensagens) => chamar('/triagem', { metodo: 'POST', corpo: { mensagens } }),
-  ajustarDiaDisponibilidade: (dados) => chamar('/disponibilidades/dia', { metodo: 'PATCH', corpo: dados }),
   removerDisponibilidade: (id) => chamar(`/disponibilidades/${id}`, { metodo: 'DELETE' }),
 
   

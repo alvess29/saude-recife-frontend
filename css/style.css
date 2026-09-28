@@ -252,6 +252,59 @@ legend { font-family: var(--fonte-titulo); font-size: 1.1rem; color: var(--cor-p
 .selo-cancelado { background: var(--cor-perigo-fundo); color: var(--cor-perigo); }
 .selo-neutro { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); }
 
+.grupo-dia { border-bottom: 1px solid var(--cor-borda); }
+.grupo-dia:last-child { border-bottom: none; }
+.grupo-dia-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 44px;
+  padding: 0.85rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+.grupo-dia-cabecalho::-webkit-details-marker { display: none; }
+.grupo-dia-cabecalho:focus-visible { outline: 3px solid var(--cor-acento); outline-offset: 2px; border-radius: var(--raio); }
+.grupo-dia-titulo::before {
+  content: '\25B8';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--cor-texto-suave);
+  transition: transform 0.15s ease;
+}
+.grupo-dia[open] .grupo-dia-titulo::before { transform: rotate(90deg); }
+.grupo-dia-semana { color: var(--cor-texto-suave); font-weight: 500; }
+.grupo-dia-resumo { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.grupo-dia-horarios { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.25rem 0 1.1rem; }
+
+.horario-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15em 0.35em 0.15em 0.85em;
+  border-radius: 999px;
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.horario-chip-reservado { background: var(--cor-aviso-fundo); color: var(--cor-acento-escuro); padding: 0.55em 0.95em; }
+.horario-chip-remover {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.horario-chip-remover:hover { background: var(--cor-perigo-fundo); color: var(--cor-perigo); }
+.horario-chip-remover:focus-visible { outline: 3px solid var(--cor-acento); }
+
 .alerta { padding: 0.9em 1.1em; border-radius: var(--raio); font-size: 0.94rem; margin-bottom: 1.1rem; display: none; }
 .alerta.mostrar { display: block; }
 .alerta-erro { background: var(--cor-perigo-fundo); color: var(--cor-perigo); border: 1px solid #f0caca; }
@@ -310,6 +363,7 @@ th { color: var(--cor-texto-suave); font-weight: 700; font-size: 0.82rem; text-t
   margin: 0.5rem 0 1rem;
 }
 .calendario-nav strong { min-width: 10rem; text-align: center; text-transform: capitalize; }
+.calendario-acoes { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .calendario { text-align: center; }
 .calendario th { text-align: center; }
 .calendario td { padding: 0.3em; border-bottom: none; }

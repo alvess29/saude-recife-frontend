@@ -6,6 +6,9 @@ let clinicas = [];
 let especialidades = [];
 let mesExibido = iniciarMesAtual();
 const diasDesmarcados = new Set();
+const diasAbertos = new Set();
+let primeiraListagem = true;
+let horariosCarregados = [];
 
 iniciar();
 
@@ -26,14 +29,15 @@ async function iniciar() {
   preencherSelectClinicas();
 
   document.getElementById('form-horario').addEventListener('submit', gerarHorarios);
-  document.getElementById('form-ajuste').addEventListener('submit', ajustarDia);
-  document.getElementById('aj-data').min = new Date().toISOString().slice(0, 10);
   document.getElementById('btn-mes-anterior').addEventListener('click', () => mudarMes(-1));
   document.getElementById('btn-mes-seguinte').addEventListener('click', () => mudarMes(1));
+  document.getElementById('btn-marcar-tudo').addEventListener('click', marcarTodosOsDias);
+  document.getElementById('btn-desmarcar-tudo').addEventListener('click', desmarcarTodosOsDias);
   renderizarCalendario();
 
   await carregarAgenda();
   await carregarHorarios();
+  setInterval(renderizarHorarios, 60000);
 }
 
 function configurarAbas() {
@@ -170,7 +174,7 @@ function alternarDia(dataIso, botao) {
   }
 }
 
-function diasMarcadosDoMes() {
+function diasDoMesAPartirDeHoje() {
   const ano = mesExibido.getFullYear();
   const mes = mesExibido.getMonth();
   const totalDias = new Date(ano, mes + 1, 0).getDate();
@@ -179,12 +183,23 @@ function diasMarcadosDoMes() {
 
   const dias = [];
   for (let dia = 1; dia <= totalDias; dia += 1) {
-    const dataIso = chaveIso(ano, mes, dia);
-    if (new Date(ano, mes, dia) >= hoje && !diasDesmarcados.has(dataIso)) {
-      dias.push(dataIso);
-    }
+    if (new Date(ano, mes, dia) >= hoje) dias.push(chaveIso(ano, mes, dia));
   }
   return dias;
+}
+
+function diasMarcadosDoMes() {
+  return diasDoMesAPartirDeHoje().filter((dataIso) => !diasDesmarcados.has(dataIso));
+}
+
+function marcarTodosOsDias() {
+  diasDoMesAPartirDeHoje().forEach((dataIso) => diasDesmarcados.delete(dataIso));
+  renderizarCalendario();
+}
+
+function desmarcarTodosOsDias() {
+  diasDoMesAPartirDeHoje().forEach((dataIso) => diasDesmarcados.add(dataIso));
+  renderizarCalendario();
 }
 
 async function gerarHorarios(evento) {
@@ -215,6 +230,102 @@ async function gerarHorarios(evento) {
   }
 }
 
+function agruparPorDia(horarios) {
+  const grupos = new Map();
+  horarios.forEach((horario) => {
+    if (!grupos.has(horario.data)) grupos.set(horario.data, []);
+    grupos.get(horario.data).push(horario);
+  });
+  return grupos;
+}
+
+function nomeDiaSemana(dataIso) {
+  const [ano, mes, dia] = dataIso.split('-').map(Number);
+  return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', { weekday: 'long' });
+}
+
+function textoContagem(quantidade, singular, plural) {
+  return `${quantidade} ${quantidade === 1 ? singular : plural}`;
+}
+
+function criarGrupoDia(data, horariosDoDia) {
+  const grupo = document.getElementById('modelo-dia-horarios').content.cloneNode(true);
+  const detalhes = grupo.querySelector('details');
+  const disponiveis = horariosDoDia.filter((h) => h.status === 'disponivel').length;
+  const reservados = horariosDoDia.length - disponiveis;
+  const nomesClinicas = [...new Set(horariosDoDia.map((h) => {
+    const clinica = clinicas.find((c) => c.id === h.clinicaId);
+    return clinica ? clinica.nome : 'Clínica';
+  }))];
+  const primeiro = horariosDoDia[0];
+  const ultimo = horariosDoDia[horariosDoDia.length - 1];
+
+  grupo.querySelector('[data-campo="dia"]').textContent = formatarData(data);
+  grupo.querySelector('[data-campo="semana"]').textContent = nomeDiaSemana(data);
+  grupo.querySelector('[data-campo="detalhes"]').textContent =
+    `${primeiro.horaInicio} às ${ultimo.horaFim} \u2022 ${nomesClinicas.join(', ')}`;
+
+  const seloDisponiveis = grupo.querySelector('[data-campo="disponiveis"]');
+  const seloReservados = grupo.querySelector('[data-campo="reservados"]');
+  if (disponiveis) seloDisponiveis.textContent = textoContagem(disponiveis, 'disponível', 'disponíveis');
+  else seloDisponiveis.remove();
+  if (reservados) seloReservados.textContent = textoContagem(reservados, 'reservado', 'reservados');
+  else seloReservados.remove();
+
+  const listaHorarios = grupo.querySelector('[data-campo="horarios"]');
+  horariosDoDia.forEach((horario) => listaHorarios.appendChild(criarChipHorario(horario)));
+
+  detalhes.open = diasAbertos.has(data);
+  detalhes.addEventListener('toggle', () => {
+    if (detalhes.open) diasAbertos.add(data);
+    else diasAbertos.delete(data);
+  });
+
+  return grupo;
+}
+
+function criarChipHorario(horario) {
+  const chip = document.getElementById('modelo-horario-chip').content.cloneNode(true);
+  const intervalo = `${horario.horaInicio} - ${horario.horaFim}`;
+  const elemento = chip.querySelector('.horario-chip');
+  const btnRemover = chip.querySelector('[data-acao="remover"]');
+
+  chip.querySelector('[data-campo="hora"]').textContent = intervalo;
+
+  if (horario.status === 'reservado') {
+    elemento.classList.add('horario-chip-reservado');
+    elemento.title = 'Reservado por um paciente';
+    btnRemover.remove();
+  } else {
+    btnRemover.setAttribute('aria-label', `Remover horário ${intervalo}`);
+    btnRemover.title = 'Remover horário';
+    btnRemover.addEventListener('click', () => removerHorario(horario.id));
+  }
+
+  return chip;
+}
+
+function horarioJaPassou(horario) {
+  return new Date(`${horario.data}T${horario.horaInicio}`) <= new Date();
+}
+
+function renderizarHorarios() {
+  const container = document.getElementById('lista-horarios-profissional');
+  const horarios = horariosCarregados.filter((h) => h.status === 'reservado' || !horarioJaPassou(h));
+
+  if (!horarios.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum horário cadastrado</strong>Use o formulário acima para abrir sua agenda.</div>';
+    return;
+  }
+
+  const grupos = agruparPorDia(horarios);
+  if (primeiraListagem) diasAbertos.add(grupos.keys().next().value);
+  primeiraListagem = false;
+
+  container.innerHTML = '';
+  grupos.forEach((horariosDoDia, data) => container.appendChild(criarGrupoDia(data, horariosDoDia)));
+}
+
 async function carregarHorarios() {
   const container = document.getElementById('lista-horarios-profissional');
   container.innerHTML = '<p class="vazio">Carregando...</p>';
@@ -224,34 +335,8 @@ async function carregarHorarios() {
       api.listarDisponibilidades({ profissionalId: perfilAtual.profissionalId, status: 'disponivel' }),
       api.listarDisponibilidades({ profissionalId: perfilAtual.profissionalId, status: 'reservado' }),
     ]);
-    const horarios = [...disponiveis, ...reservados].sort((a, b) => `${a.data}${a.horaInicio}`.localeCompare(`${b.data}${b.horaInicio}`));
-
-    if (!horarios.length) {
-      container.innerHTML = '<div class="vazio"><strong>Nenhum horário cadastrado</strong>Use o formulário acima para abrir sua agenda.</div>';
-      return;
-    }
-
-    const modelo = document.getElementById('modelo-horario-item');
-    container.innerHTML = '';
-    horarios.forEach((horario) => {
-      const item = modelo.content.cloneNode(true);
-      const clinica = clinicas.find((c) => c.id === horario.clinicaId);
-      item.querySelector('[data-campo="data"]').textContent = `${formatarData(horario.data)} \u2022 ${horario.horaInicio} - ${horario.horaFim}`;
-      item.querySelector('[data-campo="detalhes"]').textContent = clinica ? clinica.nome : 'Clínica';
-
-      const selo = item.querySelector('[data-campo="selo"]');
-      selo.textContent = horario.status === 'disponivel' ? 'Disponível' : 'Reservado';
-      selo.classList.add(horario.status === 'disponivel' ? 'selo-disponivel' : 'selo-reservado');
-
-      const btnRemover = item.querySelector('[data-acao="remover"]');
-      if (horario.status === 'reservado') {
-        btnRemover.remove();
-      } else {
-        btnRemover.addEventListener('click', () => removerHorario(horario.id));
-      }
-
-      container.appendChild(item);
-    });
+    horariosCarregados = [...disponiveis, ...reservados].sort((a, b) => `${a.data}${a.horaInicio}`.localeCompare(`${b.data}${b.horaInicio}`));
+    renderizarHorarios();
   } catch (erro) {
     container.innerHTML = `<p class="vazio">${erro.message}</p>`;
   }
@@ -264,48 +349,5 @@ async function removerHorario(id) {
     await carregarHorarios();
   } catch (erro) {
     alert(erro.message);
-  }
-}
-
-async function ajustarDia(evento) {
-  evento.preventDefault();
-  const alerta = document.getElementById('alerta-ajuste');
-  ocultarAlerta(alerta);
-
-  const dados = {
-    data: document.getElementById('aj-data').value,
-    horaInicio: document.getElementById('aj-inicio').value || undefined,
-    horaFim: document.getElementById('aj-fim').value || undefined,
-  };
-
-  if (!dados.horaInicio && !dados.horaFim) {
-    mostrarAlerta(alerta, 'Informe o novo início, o novo fim, ou os dois.', 'erro');
-    return;
-  }
-
-  try {
-    await enviarAjuste(dados, alerta);
-  } catch (erro) {
-    mostrarAlerta(alerta, erro.message, 'erro');
-  }
-}
-
-async function enviarAjuste(dados, alerta) {
-  try {
-    const resultado = await api.ajustarDiaDisponibilidade(dados);
-    const cancelados = resultado.agendamentosCancelados
-      ? ` ${resultado.agendamentosCancelados} consulta(s) cancelada(s).`
-      : '';
-    mostrarAlerta(alerta, `Dia ajustado: ${resultado.horariosRemovidos} horário(s) removido(s).${cancelados}`, 'sucesso');
-    await Promise.all([carregarHorarios(), carregarAgenda()]);
-  } catch (erro) {
-    const afetados = erro.status === 409 && erro.dados ? erro.dados.agendamentosAfetados : null;
-    if (!afetados || !afetados.length) throw erro;
-
-    const nomes = afetados
-      .map((a) => `- ${a.pacienteNome || 'Paciente'} (${formatarDataHora(a.dataHora)})`)
-      .join('\n');
-    if (!confirm(`Estas consultas ficam fora do novo horário e serão canceladas:\n\n${nomes}\n\nDeseja continuar?`)) return;
-    await enviarAjuste({ ...dados, cancelarAgendamentos: true }, alerta);
   }
 }
