@@ -21,7 +21,7 @@ frontend/
 ├── index.html          login
 ├── cadastro.html        cadastro de paciente
 ├── paciente.html        area do paciente (buscar, agendar, cancelar)
-├── profissional.html    area do profissional (cadastrar e ajustar horarios, ver agenda)
+├── profissional.html    area do profissional (cadastrar horarios, ver agenda)
 ├── admin.html           painel administrativo (cadastros e gestao)
 ├── manifest.json / sw.js  configuracao PWA
 ├── css/style.css
@@ -35,9 +35,9 @@ frontend/
 | Login e Autenticacao | `index.html` (Firebase Authentication, e-mail/senha) |
 | Cadastro de Pacientes | `cadastro.html` |
 | Gerenciamento Administrativo | `admin.html` (cadastro de clinicas, especialidades, profissionais, pacientes e administradores) |
-| Cadastro de Disponibilidade do Profissional | `profissional.html`, aba "Cadastrar horários": calendário para marcar os dias e um horário de início/fim, dividido automaticamente em horários menores |
-| Ajuste do Horário de um Dia | `profissional.html`, aba "Cadastrar horários", card "Ajustar o horário de um dia": o profissional escolhe a data e informa um novo início (chega mais tarde) e/ou um novo fim (sai mais cedo). Se houver consultas marcadas fora do novo horário, o sistema lista os pacientes e pede confirmação antes de cancelá-las |
-| Consulta de Horários Disponíveis e Agendamento | `paciente.html` (só mostra horários de hoje em diante) |
+| Cadastro de Disponibilidade do Profissional | `profissional.html`, aba "Cadastrar horários": calendário para marcar os dias (com botões "Marcar tudo" e "Desmarcar tudo" para o mês exibido) e um horário de início/fim, dividido automaticamente em horários menores |
+| Lista de Horários Agrupada por Dia | `profissional.html`, seção "Meus horários cadastrados": um bloco por dia (data, dia da semana, faixa de horário, clínica e contagem de disponíveis/reservados) que abre para mostrar os horários em botões compactos; horários livres têm um `×` para remover. Horários livres cujo início já passou somem da lista automaticamente (a tela se atualiza a cada minuto) |
+| Consulta de Horários Disponíveis e Agendamento | `paciente.html` (só mostra horários de hoje em diante e que ainda não começaram) |
 | Pré-triagem de Sintomas por IA | `paciente.html`, aba "Agendar consulta" &rarr; "Começar pré-triagem": chat que pergunta os sintomas e recomenda a especialidade |
 | Gerenciamento de Agendamentos | abas "Meus agendamentos" / "Minha agenda" / "Agendamentos" (admin) |
 | Integracao Client-Server (API REST + JSON) | `js/api.js`, que consome as rotas do repositorio backend |
@@ -88,7 +88,7 @@ ela cobre todos os requisitos da 1ª Entrega nos dois repositorios:
 4. Aba **Profissionais**: cadastre 1 profissional, marcando a especialidade e a clinica.
 5. Aba **Profissionais**: ao cadastrar, preencha tambem e-mail e senha provisoria para ja criar o login do profissional junto com o perfil.
 6. Saia (Sair) e entre com o e-mail/senha dessa conta em `index.html` — deve cair em `profissional.html`.
-7. Aba **Cadastrar horários**: no calendário, deixe marcado o dia de amanhã (ou desmarque os outros), defina um intervalo (ex.: 07:00 às 12:00) e clique em **Gerar horários para os dias marcados**. Em seguida, no card **Ajustar o horário de um dia**, informe o dia de amanhã com um novo fim mais cedo (ou um novo início mais tarde) e confirme que os horários fora do novo intervalo sumiram de "Meus horários cadastrados".
+7. Aba **Cadastrar horários**: no calendário, deixe marcado o dia de amanhã (use **Desmarcar tudo** e clique só em amanhã, ou desmarque os outros um a um), defina um intervalo (ex.: 07:00 às 12:00) e clique em **Gerar horários para os dias marcados**. Em "Meus horários cadastrados", confirme que aparece um bloco por dia, que abre ao clicar na data, e que o `×` remove um horário livre.
 8. Saia e abra `cadastro.html` para criar um paciente novo.
 9. Como paciente, em **Agendar consulta**, clique em **Começar pré-triagem** e descreva um sintoma relacionado à especialidade cadastrada (isso exige o `GEMINI_API_KEY` configurado no backend). Confirme que a IA recomenda a especialidade certa e que o botão "Ver horários de..." filtra a busca corretamente.
 10. Filtre pela especialidade cadastrada (manualmente ou via pré-triagem) e confirme que o horario aparece. Clique em **Agendar**.
