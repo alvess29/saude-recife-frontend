@@ -4,6 +4,8 @@ import { api } from './api.js';
 let clinicas = [];
 let profissionais = [];
 let especialidades = [];
+let pacientes = [];
+let pacienteEmEdicaoId = null;
 
 iniciar();
 
@@ -14,15 +16,15 @@ async function iniciar() {
   document.getElementById('form-clinica').addEventListener('submit', criarClinica);
   document.getElementById('form-profissional').addEventListener('submit', criarProfissional);
   document.getElementById('form-especialidade').addEventListener('submit', criarEspecialidade);
-  document.getElementById('form-equipe').addEventListener('submit', criarConta);
-  document.getElementById('q-tipo').addEventListener('change', alternarVinculoEquipe);
+  document.getElementById('form-paciente').addEventListener('submit', salvarPaciente);
+  document.getElementById('botao-cancelar-edicao-paciente').addEventListener('click', cancelarEdicaoPaciente);
+  document.getElementById('form-administrador').addEventListener('submit', criarAdministrador);
 
   await carregarEspecialidades();
   await carregarClinicas();
   await carregarProfissionais();
   await carregarAgendamentos();
   await carregarPacientes();
-  alternarVinculoEquipe();
 }
 
 function configurarAbas() {
@@ -150,7 +152,6 @@ async function criarEspecialidade(evento) {
 async function carregarProfissionais() {
   profissionais = await api.listarProfissionais();
   renderizarProfissionais();
-  atualizarSelectSimples('q-profissional', profissionais, 'Selecione um profissional');
 }
 
 function renderizarProfissionais() {
@@ -189,19 +190,45 @@ function renderizarProfissionais() {
 async function criarProfissional(evento) {
   evento.preventDefault();
   const alerta = document.getElementById('alerta-profissional');
+  const senha = document.getElementById('p-senha').value;
+  const email = valor('p-email');
+
+  if (senha && !email) {
+    mostrarAlerta(alerta, 'Informe o e-mail do profissional para criar o login.', 'erro');
+    return;
+  }
+
   try {
-    await api.criarProfissional({
+    const profissional = await api.criarProfissional({
       nome: valor('p-nome'),
       cpf: valor('p-cpf').replace(/\D/g, ''),
       registroProfissional: valor('p-registro'),
       conselho: valor('p-conselho'),
       ufRegistro: valor('p-uf'),
       telefone: valor('p-telefone'),
-      email: valor('p-email'),
+      email,
       especialidadeIds: selecionados('p-especialidades'),
       clinicaIds: selecionados('p-clinicas'),
     });
-    mostrarAlerta(alerta, 'Profissional cadastrado com sucesso.', 'sucesso');
+
+    if (senha) {
+      try {
+        await api.registrarEquipe({
+          nome: valor('p-nome'),
+          email,
+          senha,
+          tipoUsuario: 'profissional',
+          profissionalId: profissional.id,
+        });
+      } catch (erroLogin) {
+        mostrarAlerta(alerta, `Profissional cadastrado, mas o login nao foi criado: ${erroLogin.message}`, 'erro');
+        document.getElementById('form-profissional').reset();
+        await carregarProfissionais();
+        return;
+      }
+    }
+
+    mostrarAlerta(alerta, senha ? 'Profissional e login criados com sucesso.' : 'Profissional cadastrado com sucesso.', 'sucesso');
     document.getElementById('form-profissional').reset();
     await carregarProfissionais();
   } catch (erro) {
@@ -215,7 +242,7 @@ async function carregarPacientes() {
   const container = document.getElementById('lista-pacientes');
 
   try {
-    const pacientes = await api.listarPacientes();
+    pacientes = await api.listarPacientes();
     if (!pacientes.length) {
       container.innerHTML = '<div class="vazio"><strong>Nenhum paciente cadastrado ainda</strong></div>';
       return;
@@ -227,8 +254,84 @@ async function carregarPacientes() {
       item.querySelector('[data-campo="nome"]').textContent = p.nome;
       item.querySelector('[data-campo="detalhes"]').textContent =
         `${p.email} \u2022 ${p.telefone || 'sem telefone'} \u2022 CPF ${formatarCpf(p.cpf)}`;
+      item.querySelector('[data-acao="editar"]').addEventListener('click', () => editarPaciente(p.uid));
       container.appendChild(item);
     });
+  } catch (erro) {
+    mostrarAlerta(alerta, erro.message, 'erro');
+  }
+}
+
+function editarPaciente(uid) {
+  const paciente = pacientes.find((p) => p.uid === uid);
+  if (!paciente) return;
+
+  pacienteEmEdicaoId = uid;
+  document.getElementById('pa-nome').value = paciente.nome || '';
+  document.getElementById('pa-cpf').value = formatarCpf(paciente.cpf);
+  document.getElementById('pa-email').value = paciente.email || '';
+  document.getElementById('pa-telefone').value = paciente.telefone || '';
+  document.getElementById('pa-nascimento').value = paciente.dataNascimento || '';
+  document.getElementById('pa-sexo').value = paciente.sexo || '';
+  document.getElementById('pa-observacoes').value = paciente.observacoes || '';
+
+  document.getElementById('pa-cpf').disabled = true;
+  document.getElementById('pa-email').disabled = true;
+  document.getElementById('grupo-pa-senha').style.display = 'none';
+
+  document.getElementById('titulo-form-paciente').textContent = `Editando: ${paciente.nome}`;
+  document.getElementById('botao-form-paciente').textContent = 'Salvar alteracoes';
+  document.getElementById('botao-cancelar-edicao-paciente').style.display = 'inline-flex';
+  document.getElementById('form-paciente').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelarEdicaoPaciente() {
+  pacienteEmEdicaoId = null;
+  document.getElementById('form-paciente').reset();
+  document.getElementById('pa-cpf').disabled = false;
+  document.getElementById('pa-email').disabled = false;
+  document.getElementById('grupo-pa-senha').style.display = 'block';
+  document.getElementById('titulo-form-paciente').textContent = 'Novo paciente';
+  document.getElementById('botao-form-paciente').textContent = 'Cadastrar paciente';
+  document.getElementById('botao-cancelar-edicao-paciente').style.display = 'none';
+  ocultarAlerta(document.getElementById('alerta-paciente'));
+}
+
+async function salvarPaciente(evento) {
+  evento.preventDefault();
+  const alerta = document.getElementById('alerta-paciente');
+
+  try {
+    if (pacienteEmEdicaoId) {
+      await api.atualizarPaciente(pacienteEmEdicaoId, {
+        nome: valor('pa-nome'),
+        telefone: valor('pa-telefone'),
+        dataNascimento: valor('pa-nascimento'),
+        sexo: document.getElementById('pa-sexo').value,
+        observacoes: valor('pa-observacoes'),
+      });
+      mostrarAlerta(alerta, 'Paciente atualizado com sucesso.', 'sucesso');
+      cancelarEdicaoPaciente();
+    } else {
+      const senha = document.getElementById('pa-senha').value;
+      if (!senha) {
+        mostrarAlerta(alerta, 'Informe uma senha provisoria para o paciente.', 'erro');
+        return;
+      }
+      await api.registrarPaciente({
+        nome: valor('pa-nome'),
+        cpf: valor('pa-cpf').replace(/\D/g, ''),
+        email: valor('pa-email'),
+        senha,
+        telefone: valor('pa-telefone'),
+        dataNascimento: valor('pa-nascimento'),
+        sexo: document.getElementById('pa-sexo').value,
+        observacoes: valor('pa-observacoes'),
+      });
+      mostrarAlerta(alerta, 'Paciente cadastrado com sucesso.', 'sucesso');
+      document.getElementById('form-paciente').reset();
+    }
+    await carregarPacientes();
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }
@@ -239,27 +342,19 @@ function formatarCpf(cpf) {
   return `${cpf.slice(0, 3)}.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-${cpf.slice(9)}`;
 }
 
-function alternarVinculoEquipe() {
-  const tipo = document.getElementById('q-tipo').value;
-  document.getElementById('grupo-vinculo').style.display = tipo === 'profissional' ? 'block' : 'none';
-}
-
-async function criarConta(evento) {
+async function criarAdministrador(evento) {
   evento.preventDefault();
-  const alerta = document.getElementById('alerta-equipe');
-  const tipoUsuario = document.getElementById('q-tipo').value;
+  const alerta = document.getElementById('alerta-administradores');
 
   try {
     await api.registrarEquipe({
-      nome: valor('q-nome'),
-      email: valor('q-email'),
-      senha: document.getElementById('q-senha').value,
-      tipoUsuario,
-      profissionalId: tipoUsuario === 'profissional' ? document.getElementById('q-profissional').value : null,
+      nome: valor('ad-nome'),
+      email: valor('ad-email'),
+      senha: document.getElementById('ad-senha').value,
+      tipoUsuario: 'administrador',
     });
-    mostrarAlerta(alerta, 'Conta criada com sucesso. Compartilhe a senha provisoria com a pessoa.', 'sucesso');
-    document.getElementById('form-equipe').reset();
-    alternarVinculoEquipe();
+    mostrarAlerta(alerta, 'Conta de administrador criada com sucesso.', 'sucesso');
+    document.getElementById('form-administrador').reset();
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }
@@ -313,13 +408,6 @@ function selecionados(id) {
 function atualizarSelectMultiplo(id, itens) {
   const select = document.getElementById(id);
   select.innerHTML = '';
-  itens.filter((i) => i.ativo !== false).forEach((i) => select.append(new Option(i.nome, i.id)));
-}
-
-function atualizarSelectSimples(id, itens, rotuloVazio) {
-  const select = document.getElementById(id);
-  select.innerHTML = '';
-  select.append(new Option(rotuloVazio, ''));
   itens.filter((i) => i.ativo !== false).forEach((i) => select.append(new Option(i.nome, i.id)));
 }
 

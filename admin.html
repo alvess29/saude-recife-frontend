@@ -35,7 +35,7 @@
       <button class="aba-btn" data-aba="profissionais" role="tab">Profissionais</button>
       <button class="aba-btn" data-aba="especialidades" role="tab">Especialidades</button>
       <button class="aba-btn" data-aba="pacientes" role="tab">Pacientes</button>
-      <button class="aba-btn" data-aba="equipe" role="tab">Contas da equipe</button>
+      <button class="aba-btn" data-aba="administradores" role="tab">Administradores</button>
       <button class="aba-btn" data-aba="agendamentos" role="tab">Agendamentos</button>
     </div>
 
@@ -90,6 +90,10 @@
             <div class="campo"><label for="p-telefone">Telefone</label><input type="tel" id="p-telefone" /></div>
             <div class="campo"><label for="p-email">E-mail</label><input type="email" id="p-email" /></div>
           </div>
+          <div class="campo">
+            <label for="p-senha">Senha de acesso (opcional)</label>
+            <input type="password" id="p-senha" minlength="6" />
+          </div>
           <div class="linha-campos">
             <div class="campo">
               <label for="p-especialidades">Especialidades</label>
@@ -131,35 +135,56 @@
 
     
     <section class="painel-aba" id="painel-pacientes">
+      <div class="cartao">
+        <h3 id="titulo-form-paciente">Novo paciente</h3>
+        <div class="alerta" id="alerta-paciente" role="alert"></div>
+        <form id="form-paciente">
+          <div class="linha-campos">
+            <div class="campo"><label for="pa-nome">Nome</label><input type="text" id="pa-nome" required /></div>
+            <div class="campo"><label for="pa-cpf">CPF</label><input type="text" id="pa-cpf" required /></div>
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="pa-email">E-mail</label><input type="email" id="pa-email" required /></div>
+            <div class="campo"><label for="pa-telefone">Telefone</label><input type="tel" id="pa-telefone" /></div>
+          </div>
+          <div class="campo" id="grupo-pa-senha">
+            <label for="pa-senha">Senha provisoria</label>
+            <input type="password" id="pa-senha" minlength="6" />
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="pa-nascimento">Data de nascimento</label><input type="date" id="pa-nascimento" /></div>
+            <div class="campo">
+              <label for="pa-sexo">Sexo</label>
+              <select id="pa-sexo">
+                <option value="">Nao informar</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo"><label for="pa-observacoes">Observacoes de saude</label><input type="text" id="pa-observacoes" /></div>
+          <button type="submit" class="btn btn-primario" id="botao-form-paciente">Cadastrar paciente</button>
+          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-paciente" style="display:none;">Cancelar edicao</button>
+        </form>
+      </div>
       <div class="alerta" id="alerta-pacientes" role="alert"></div>
       <div class="cartao">
         <h3>Pacientes cadastrados</h3>
-        <p style="color:var(--cor-texto-suave);font-size:0.9rem;margin-top:-0.5rem;">Cadastro feito pelo proprio paciente em "Criar conta". Lista somente leitura.</p>
         <div id="lista-pacientes"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
 
     
-    <section class="painel-aba" id="painel-equipe">
+    <section class="painel-aba" id="painel-administradores">
       <div class="cartao cartao-estreito">
-        <h3>Criar conta de acesso</h3>
-        <p style="color:var(--cor-texto-suave);font-size:0.9rem;">Use para dar login a um profissional ja cadastrado ou criar outro administrador.</p>
-        <div class="alerta" id="alerta-equipe" role="alert"></div>
-        <form id="form-equipe">
-          <div class="campo"><label for="q-nome">Nome</label><input type="text" id="q-nome" required /></div>
-          <div class="campo"><label for="q-email">E-mail</label><input type="email" id="q-email" required /></div>
-          <div class="campo"><label for="q-senha">Senha provisoria</label><input type="password" id="q-senha" required minlength="6" /></div>
-          <div class="campo">
-            <label for="q-tipo">Tipo de conta</label>
-            <select id="q-tipo">
-              <option value="profissional">Profissional de saúde</option>
-              <option value="administrador">Administrador</option>
-            </select>
-          </div>
-          <div class="campo" id="grupo-vinculo">
-            <label for="q-profissional">Vincular ao profissional</label>
-            <select id="q-profissional"></select>
-          </div>
+        <h3>Criar conta de administrador</h3>
+        <p style="color:var(--cor-texto-suave);font-size:0.9rem;">Contas de profissionais sao criadas junto com o cadastro, na aba Profissionais.</p>
+        <div class="alerta" id="alerta-administradores" role="alert"></div>
+        <form id="form-administrador">
+          <div class="campo"><label for="ad-nome">Nome</label><input type="text" id="ad-nome" required /></div>
+          <div class="campo"><label for="ad-email">E-mail</label><input type="email" id="ad-email" required /></div>
+          <div class="campo"><label for="ad-senha">Senha provisoria</label><input type="password" id="ad-senha" required minlength="6" /></div>
           <button type="submit" class="btn btn-primario btn-bloco">Criar conta</button>
         </form>
       </div>
@@ -224,6 +249,9 @@
     <div>
       <div class="item-lista-titulo" data-campo="nome"></div>
       <div class="item-lista-meta" data-campo="detalhes"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <button class="btn btn-secundario btn-pequeno" data-acao="editar">Editar</button>
     </div>
   </div>
 </template>

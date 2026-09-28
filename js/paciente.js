@@ -5,6 +5,8 @@ let clinicas = [];
 let profissionais = [];
 let especialidades = [];
 let profissionalSelecionadoId = '';
+let mensagensTriagem = [];
+let triagemEncerrada = false;
 
 iniciar();
 
@@ -28,6 +30,10 @@ async function iniciar() {
   });
   document.getElementById('busca-prof-nome').addEventListener('input', renderizarBuscaProfissionais);
   document.getElementById('form-perfil').addEventListener('submit', salvarPerfil);
+
+  document.getElementById('btn-abrir-triagem').addEventListener('click', abrirTriagem);
+  document.getElementById('btn-fechar-triagem').addEventListener('click', fecharTriagem);
+  document.getElementById('form-chat-triagem').addEventListener('submit', enviarMensagemTriagem);
 
   renderizarBuscaProfissionais();
   await carregarHorarios();
@@ -285,4 +291,81 @@ async function salvarPerfil(evento) {
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }
+}
+
+function abrirTriagem() {
+  document.getElementById('chat-triagem').style.display = 'block';
+  document.getElementById('btn-abrir-triagem').style.display = 'none';
+
+  if (!mensagensTriagem.length) {
+    adicionarBolhaChat('assistente', 'Oi! Pra te ajudar a escolher a especialidade certa, me conta: o que você está sentindo?');
+  }
+  document.getElementById('chat-entrada').focus();
+}
+
+function fecharTriagem() {
+  document.getElementById('chat-triagem').style.display = 'none';
+  document.getElementById('btn-abrir-triagem').style.display = 'inline-flex';
+}
+
+function adicionarBolhaChat(papel, texto) {
+  const container = document.getElementById('chat-mensagens');
+  const bolha = document.createElement('div');
+  bolha.className = `chat-bolha chat-bolha-${papel}`;
+  bolha.textContent = texto;
+  container.appendChild(bolha);
+  container.scrollTop = container.scrollHeight;
+  return bolha;
+}
+
+async function enviarMensagemTriagem(evento) {
+  evento.preventDefault();
+  if (triagemEncerrada) return;
+
+  const entrada = document.getElementById('chat-entrada');
+  const texto = entrada.value.trim();
+  if (!texto) return;
+
+  adicionarBolhaChat('usuario', texto);
+  mensagensTriagem.push({ papel: 'usuario', texto });
+  entrada.value = '';
+  entrada.disabled = true;
+  document.querySelector('#form-chat-triagem button').disabled = true;
+
+  const bolhaCarregando = adicionarBolhaChat('assistente', 'Digitando...');
+
+  try {
+    const resultado = await api.conversarTriagem(mensagensTriagem);
+    bolhaCarregando.textContent = resultado.resposta;
+    mensagensTriagem.push({ papel: 'assistente', texto: resultado.resposta });
+
+    if (resultado.emergencia) {
+      triagemEncerrada = true;
+      bolhaCarregando.classList.add('chat-bolha-emergencia');
+    } else if (resultado.concluido && resultado.especialidadeId) {
+      triagemEncerrada = true;
+      const botaoVerHorarios = document.createElement('button');
+      botaoVerHorarios.type = 'button';
+      botaoVerHorarios.className = 'btn btn-acento btn-pequeno';
+      botaoVerHorarios.style.marginTop = '0.5rem';
+      botaoVerHorarios.textContent = `Ver horários de ${resultado.especialidadeRecomendada}`;
+      botaoVerHorarios.addEventListener('click', () => usarEspecialidadeRecomendada(resultado.especialidadeId));
+      document.getElementById('chat-mensagens').appendChild(botaoVerHorarios);
+    }
+  } catch (erro) {
+    bolhaCarregando.textContent = erro.message;
+  } finally {
+    entrada.disabled = triagemEncerrada;
+    document.querySelector('#form-chat-triagem button').disabled = triagemEncerrada;
+    if (!triagemEncerrada) entrada.focus();
+  }
+}
+
+function usarEspecialidadeRecomendada(especialidadeId) {
+  document.getElementById('filtro-especialidade').value = especialidadeId;
+  limparSelecaoProfissional();
+  renderizarBuscaProfissionais();
+  carregarHorarios();
+  fecharTriagem();
+  document.getElementById('cartao-horarios').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

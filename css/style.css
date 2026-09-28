@@ -302,6 +302,92 @@ th { color: var(--cor-texto-suave); font-weight: 700; font-size: 0.82rem; text-t
   padding: 2rem 0;
 }
 
+.calendario-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0.5rem 0 1rem;
+}
+.calendario-nav strong { min-width: 10rem; text-align: center; text-transform: capitalize; }
+.calendario { text-align: center; }
+.calendario th { text-align: center; }
+.calendario td { padding: 0.3em; border-bottom: none; }
+.dia-calendario {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-texto);
+  font-weight: 600;
+  cursor: pointer;
+}
+.dia-calendario:hover { border-color: var(--cor-primaria); }
+.dia-calendario.dia-desmarcado {
+  background: var(--cor-fundo);
+  color: var(--cor-texto-suave);
+  text-decoration: line-through;
+}
+.dia-calendario:disabled {
+  background: var(--cor-fundo);
+  color: var(--cor-borda);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+.calendario-legenda {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+  margin-top: 0.75rem;
+}
+.calendario-marcador {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 4px;
+  margin-right: 0.35em;
+  vertical-align: middle;
+}
+.calendario-marcador-marcado { background: var(--cor-sucesso-fundo); border: 1.5px solid var(--cor-sucesso); }
+.calendario-marcador-desmarcado { background: var(--cor-fundo); border: 1.5px solid var(--cor-borda); }
+
+.chat-mensagens {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.75rem 0.25rem;
+}
+.chat-bolha {
+  padding: 0.6em 0.95em;
+  border-radius: var(--raio-grande);
+  max-width: 82%;
+  font-size: 0.93rem;
+  line-height: 1.4;
+}
+.chat-bolha-usuario {
+  align-self: flex-end;
+  background: var(--cor-primaria);
+  color: #fff;
+}
+.chat-bolha-assistente {
+  align-self: flex-start;
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+}
+.chat-bolha-emergencia {
+  background: var(--cor-perigo-fundo) !important;
+  color: var(--cor-perigo) !important;
+  border: 1.5px solid var(--cor-perigo) !important;
+  font-weight: 600;
+}
+.chat-form { display: flex; gap: 0.6rem; margin-top: 0.5rem; }
+.chat-form input { flex: 1; }
+
 @media (max-width: 640px) {
   .item-lista { flex-direction: column; }
   .hero { padding: 2.2rem 1.4rem; }

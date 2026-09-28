@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Area do profissional - Saúde Recife</title>
+<title>Área do profissional - Saúde Recife</title>
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#0B5D5D" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<a class="skip-link" href="#conteudo-principal">Pular para o conteudo</a>
+<a class="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
 
 <header class="topbar">
   <div class="topbar-inner">
@@ -26,41 +26,55 @@
 <main id="conteudo-principal">
   <div class="container">
     <div class="pagina-cabecalho">
-      <h1>Area do profissional</h1>
-      <p>Cadastre seus horarios de atendimento e acompanhe sua agenda.</p>
+      <h1>Área do profissional</h1>
+      <p>Cadastre seus horários de atendimento e acompanhe sua agenda.</p>
     </div>
 
     <div class="abas" role="tablist">
       <button class="aba-btn ativa" data-aba="agenda" role="tab">Minha agenda</button>
-      <button class="aba-btn" data-aba="horarios" role="tab">Cadastrar horarios</button>
+      <button class="aba-btn" data-aba="horarios" role="tab">Cadastrar horários</button>
     </div>
 
     <section class="painel-aba ativa" id="painel-agenda">
       <div class="alerta" id="alerta-agenda" role="alert"></div>
       <div class="cartao">
-        <h3>Proximos atendimentos</h3>
+        <h3>Próximos atendimentos</h3>
         <div id="lista-agenda"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
 
     <section class="painel-aba" id="painel-horarios">
       <div class="cartao">
-        <h3>Novo horario disponivel</h3>
+        <h3>Dias de atendimento</h3>
+        <p class="ajuda">Todos os dias do mês começam marcados. Clique em um dia para desmarcá-lo, depois defina o horário abaixo.</p>
+        <div class="calendario-nav">
+          <button type="button" class="btn btn-secundario btn-pequeno" id="btn-mes-anterior" aria-label="Mês anterior">&lsaquo;</button>
+          <strong id="calendario-titulo"></strong>
+          <button type="button" class="btn btn-secundario btn-pequeno" id="btn-mes-seguinte" aria-label="Próximo mês">&rsaquo;</button>
+        </div>
+        <table class="calendario">
+          <thead>
+            <tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr>
+          </thead>
+          <tbody id="calendario-corpo"></tbody>
+        </table>
+        <div class="calendario-legenda">
+          <span><span class="calendario-marcador calendario-marcador-marcado"></span> Vou atender</span>
+          <span><span class="calendario-marcador calendario-marcador-desmarcado"></span> Não vou atender</span>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <h3>Horário dos dias marcados</h3>
         <div class="alerta" id="alerta-horario" role="alert"></div>
         <form id="form-horario">
-          <div class="linha-campos">
-            <div class="campo">
-              <label for="h-clinica">Clinica</label>
-              <select id="h-clinica" required></select>
-            </div>
-            <div class="campo">
-              <label for="h-data">Data</label>
-              <input type="date" id="h-data" required />
-            </div>
+          <div class="campo">
+            <label for="h-clinica">Clínica</label>
+            <select id="h-clinica" required></select>
           </div>
           <div class="linha-campos">
             <div class="campo">
-              <label for="h-inicio">Hora inicio</label>
+              <label for="h-inicio">Hora início</label>
               <input type="time" id="h-inicio" required />
             </div>
             <div class="campo">
@@ -68,16 +82,39 @@
               <input type="time" id="h-fim" required />
             </div>
             <div class="campo">
-              <label for="h-duracao">Duracao (min)</label>
+              <label for="h-duracao">Duração (min)</label>
               <input type="number" id="h-duracao" value="30" min="10" step="5" />
             </div>
           </div>
-          <button type="submit" class="btn btn-primario">Cadastrar horario</button>
+          <button type="submit" class="btn btn-primario">Gerar horários para os dias marcados</button>
         </form>
       </div>
 
       <div class="cartao">
-        <h3>Meus horarios cadastrados</h3>
+        <h3>Ajustar o horário de um dia</h3>
+        <p class="ajuda">Vai sair mais cedo ou chegar mais tarde em um dia específico? Informe a data e o novo horário. Os horários livres fora dele são removidos.</p>
+        <div class="alerta" id="alerta-ajuste" role="alert"></div>
+        <form id="form-ajuste">
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="aj-data">Data</label>
+              <input type="date" id="aj-data" required />
+            </div>
+            <div class="campo">
+              <label for="aj-inicio">Novo início (opcional)</label>
+              <input type="time" id="aj-inicio" />
+            </div>
+            <div class="campo">
+              <label for="aj-fim">Novo fim (opcional)</label>
+              <input type="time" id="aj-fim" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primario">Ajustar horário do dia</button>
+        </form>
+      </div>
+
+      <div class="cartao">
+        <h3>Meus horários cadastrados</h3>
         <div id="lista-horarios-profissional"><p class="vazio">Carregando...</p></div>
       </div>
     </section>

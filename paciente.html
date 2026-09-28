@@ -38,6 +38,21 @@
 
     
     <section class="painel-aba ativa" id="painel-agendar">
+      <div class="cartao" id="cartao-triagem">
+        <h3>Pré-triagem com IA</h3>
+        <p class="ajuda">Não sabe qual especialidade procurar? Descreva o que você está sentindo e a IA te ajuda a escolher o profissional certo.</p>
+        <button type="button" class="btn btn-secundario" id="btn-abrir-triagem">Começar pré-triagem</button>
+
+        <div id="chat-triagem" style="display:none;">
+          <div class="chat-mensagens" id="chat-mensagens"></div>
+          <form id="form-chat-triagem" class="chat-form">
+            <input type="text" id="chat-entrada" placeholder="Descreva o que você está sentindo..." autocomplete="off" />
+            <button type="submit" class="btn btn-primario">Enviar</button>
+          </form>
+          <button type="button" class="btn btn-secundario btn-pequeno" id="btn-fechar-triagem" style="margin-top:0.5rem;">Fechar</button>
+        </div>
+      </div>
+
       <div class="cartao">
         <h3>Buscar profissionais</h3>
         <div class="linha-campos">

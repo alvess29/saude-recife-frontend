@@ -19,7 +19,10 @@ async function chamar(caminho, { metodo = 'GET', corpo, autenticado = true } = {
 
   if (!resposta.ok) {
     const mensagem = dados.erro || `Erro na requisicao (HTTP ${resposta.status}).`;
-    throw new Error(mensagem);
+    const erro = new Error(mensagem);
+    erro.status = resposta.status;
+    erro.dados = dados;
+    throw erro;
   }
   return dados;
 }
@@ -32,6 +35,7 @@ export const api = {
   perfil: () => chamar('/auth/perfil'),
   atualizarPerfil: (dados) => chamar('/auth/perfil', { metodo: 'PUT', corpo: dados }),
   listarPacientes: () => chamar('/auth/pacientes'),
+  atualizarPaciente: (id, dados) => chamar(`/auth/pacientes/${id}`, { metodo: 'PUT', corpo: dados }),
 
   
   listarClinicas: () => chamar('/clinicas'),
@@ -61,6 +65,9 @@ export const api = {
     return chamar(`/disponibilidades${query ? `?${query}` : ''}`);
   },
   criarDisponibilidade: (dados) => chamar('/disponibilidades', { metodo: 'POST', corpo: dados }),
+  criarDisponibilidadesEmLote: (dados) => chamar('/disponibilidades/lote', { metodo: 'POST', corpo: dados }),
+  conversarTriagem: (mensagens) => chamar('/triagem', { metodo: 'POST', corpo: { mensagens } }),
+  ajustarDiaDisponibilidade: (dados) => chamar('/disponibilidades/dia', { metodo: 'PATCH', corpo: dados }),
   removerDisponibilidade: (id) => chamar(`/disponibilidades/${id}`, { metodo: 'DELETE' }),
 
   
