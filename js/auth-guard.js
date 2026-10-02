@@ -75,3 +75,21 @@ export function formatarData(dataISO) {
   const [ano, mes, dia] = dataISO.split('-');
   return `${dia}/${mes}/${ano}`;
 }
+
+export function agruparPorDia(horarios) {
+  const grupos = new Map();
+  horarios.forEach((horario) => {
+    if (!grupos.has(horario.data)) grupos.set(horario.data, []);
+    grupos.get(horario.data).push(horario);
+  });
+  return grupos;
+}
+
+export function nomeDiaSemana(dataISO) {
+  const [ano, mes, dia] = dataISO.split('-').map(Number);
+  return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', { weekday: 'long' });
+}
+
+export function textoContagem(quantidade, singular, plural) {
+  return `${quantidade} ${quantidade === 1 ? singular : plural}`;
+}

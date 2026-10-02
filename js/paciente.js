@@ -1,4 +1,4 @@
-import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora } from './auth-guard.js';
+import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, nomeDiaSemana, textoContagem } from './auth-guard.js';
 import { api } from './api.js';
 
 let clinicas = [];
@@ -7,6 +7,7 @@ let especialidades = [];
 let profissionalSelecionadoId = '';
 let mensagensTriagem = [];
 let triagemEncerrada = false;
+const diasAbertos = new Set();
 
 iniciar();
 
@@ -29,6 +30,8 @@ async function iniciar() {
     carregarHorarios();
   });
   document.getElementById('busca-prof-nome').addEventListener('input', renderizarBuscaProfissionais);
+  document.getElementById('busca-clinica-nome').addEventListener('input', renderizarClinicas);
+  document.getElementById('busca-clinica-especialidade').addEventListener('change', renderizarClinicas);
   document.getElementById('form-perfil').addEventListener('submit', salvarPerfil);
 
   document.getElementById('btn-abrir-triagem').addEventListener('click', abrirTriagem);
@@ -36,20 +39,21 @@ async function iniciar() {
   document.getElementById('form-chat-triagem').addEventListener('submit', enviarMensagemTriagem);
 
   renderizarBuscaProfissionais();
+  renderizarClinicas();
+  renderizarEspecialidades();
   await carregarHorarios();
   await carregarMeusAgendamentos();
 }
 
 function configurarAbas() {
-  const botoes = document.querySelectorAll('.aba-btn');
-  botoes.forEach((botao) => {
-    botao.addEventListener('click', () => {
-      botoes.forEach((b) => b.classList.remove('ativa'));
-      document.querySelectorAll('.painel-aba').forEach((p) => p.classList.remove('ativa'));
-      botao.classList.add('ativa');
-      document.getElementById(`painel-${botao.dataset.aba}`).classList.add('ativa');
-    });
+  document.querySelectorAll('.aba-btn').forEach((botao) => {
+    botao.addEventListener('click', () => abrirAba(botao.dataset.aba));
   });
+}
+
+function abrirAba(nome) {
+  document.querySelectorAll('.aba-btn').forEach((b) => b.classList.toggle('ativa', b.dataset.aba === nome));
+  document.querySelectorAll('.painel-aba').forEach((p) => p.classList.toggle('ativa', p.id === `painel-${nome}`));
 }
 
 async function carregarReferencia() {
@@ -70,6 +74,110 @@ function preencherFiltros() {
   clinicas.filter((c) => c.ativo !== false).forEach((c) => {
     selectClinica.append(new Option(c.nome, c.id));
   });
+
+  const selectEspecialidadeClinica = document.getElementById('busca-clinica-especialidade');
+  especialidades.filter((e) => e.ativo !== false).forEach((e) => {
+    selectEspecialidadeClinica.append(new Option(e.nome, e.id));
+  });
+}
+
+function semAcento(texto) {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function nomesDasEspecialidades(ids) {
+  return (ids || [])
+    .map((id) => especialidades.find((e) => e.id === id))
+    .filter((e) => e && e.ativo !== false)
+    .map((e) => e.nome);
+}
+
+function renderizarClinicas() {
+  const container = document.getElementById('lista-clinicas');
+  const termo = semAcento(document.getElementById('busca-clinica-nome').value.trim());
+  const especialidadeId = document.getElementById('busca-clinica-especialidade').value;
+
+  const resultado = clinicas.filter((c) => {
+    if (c.ativo === false) return false;
+    if (termo && !semAcento(c.nome).includes(termo)) return false;
+    if (especialidadeId && !(c.especialidadeIds || []).includes(especialidadeId)) return false;
+    return true;
+  });
+
+  if (!resultado.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhuma clínica encontrada</strong>Tente outro nome ou especialidade.</div>';
+    return;
+  }
+
+  const modelo = document.getElementById('modelo-clinica');
+  container.innerHTML = '';
+  resultado.forEach((c) => {
+    const item = modelo.content.cloneNode(true);
+    const nomes = nomesDasEspecialidades(c.especialidadeIds);
+
+    item.querySelector('[data-campo="nome"]').textContent = c.nome;
+    item.querySelector('[data-campo="endereco"]').textContent = c.endereco;
+
+    const contato = item.querySelector('[data-campo="contato"]');
+    const telefone = document.createElement('a');
+    telefone.href = `tel:${c.telefone.replace(/[^\d+]/g, '')}`;
+    telefone.textContent = c.telefone;
+    contato.append(telefone, c.email ? ` \u2022 ${c.email}` : '');
+
+    const funcionamento = item.querySelector('[data-campo="funcionamento"]');
+    if (c.horarioFuncionamento) funcionamento.textContent = `Funcionamento: ${c.horarioFuncionamento}`;
+    else funcionamento.remove();
+
+    item.querySelector('[data-campo="especialidades"]').textContent =
+      nomes.length ? `Especialidades: ${nomes.join(', ')}` : 'Especialidades não informadas';
+
+    item.querySelector('[data-acao="ver-profissionais"]').addEventListener('click', () =>
+      buscarProfissionaisDe({ clinicaId: c.id })
+    );
+    container.appendChild(item);
+  });
+}
+
+function renderizarEspecialidades() {
+  const container = document.getElementById('lista-especialidades');
+  const ativas = especialidades.filter((e) => e.ativo !== false);
+
+  if (!ativas.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhuma especialidade disponível</strong>Volte mais tarde.</div>';
+    return;
+  }
+
+  const modelo = document.getElementById('modelo-especialidade');
+  container.innerHTML = '';
+  ativas.forEach((e) => {
+    const item = modelo.content.cloneNode(true);
+    const total = profissionais.filter((p) => p.ativo !== false && (p.especialidadeIds || []).includes(e.id)).length;
+
+    item.querySelector('[data-campo="nome"]').textContent = e.nome;
+    item.querySelector('[data-campo="descricao"]').textContent = e.descricao || 'Sem descrição cadastrada.';
+    item.querySelector('[data-campo="profissionais"]').textContent =
+      total === 1 ? '1 profissional' : `${total} profissionais`;
+
+    const botao = item.querySelector('[data-acao="ver-profissionais"]');
+    if (total) {
+      botao.addEventListener('click', () => buscarProfissionaisDe({ especialidadeId: e.id }));
+    } else {
+      botao.disabled = true;
+      botao.textContent = 'Sem profissionais';
+    }
+    container.appendChild(item);
+  });
+}
+
+function buscarProfissionaisDe({ especialidadeId = '', clinicaId = '' }) {
+  document.getElementById('filtro-especialidade').value = especialidadeId;
+  document.getElementById('filtro-clinica').value = clinicaId;
+  document.getElementById('busca-prof-nome').value = '';
+  limparSelecaoProfissional();
+  renderizarBuscaProfissionais();
+  carregarHorarios();
+  abrirAba('agendar');
+  document.getElementById('lista-busca-profissionais').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderizarBuscaProfissionais() {
@@ -148,7 +256,69 @@ function limparSelecaoProfissional() {
   document.getElementById('filtro-profissional-ativo').style.display = 'none';
 }
 
-async function carregarHorarios() {
+function nomeDaClinica(clinicaId) {
+  const clinica = clinicas.find((c) => c.id === clinicaId);
+  return clinica ? clinica.nome : 'Clínica';
+}
+
+function agruparPorProfissional(horarios) {
+  const grupos = new Map();
+  horarios.forEach((horario) => {
+    const chave = `${horario.profissionalId}|${horario.clinicaId}`;
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(horario);
+  });
+  return grupos;
+}
+
+function criarGrupoDia(data, horariosDoDia, especialidadeId) {
+  const grupo = document.getElementById('modelo-dia-horarios').content.cloneNode(true);
+  const detalhes = grupo.querySelector('details');
+  const porProfissional = agruparPorProfissional(horariosDoDia);
+  const nomesClinicas = [...new Set(horariosDoDia.map((h) => nomeDaClinica(h.clinicaId)))];
+  const resumo = [nomesClinicas.join(', ')];
+  if (porProfissional.size > 1) resumo.push(`${porProfissional.size} profissionais`);
+
+  grupo.querySelector('[data-campo="dia"]').textContent = formatarData(data);
+  grupo.querySelector('[data-campo="semana"]').textContent = nomeDiaSemana(data);
+  grupo.querySelector('[data-campo="detalhes"]').textContent = resumo.join(' \u2022 ');
+  grupo.querySelector('[data-campo="total"]').textContent = textoContagem(horariosDoDia.length, 'horário', 'horários');
+
+  const lista = grupo.querySelector('[data-campo="profissionais"]');
+  porProfissional.forEach((horarios) => lista.appendChild(criarGrupoProfissional(horarios, especialidadeId)));
+
+  detalhes.open = diasAbertos.has(data);
+  detalhes.addEventListener('toggle', () => {
+    if (detalhes.open) diasAbertos.add(data);
+    else diasAbertos.delete(data);
+  });
+
+  return grupo;
+}
+
+function criarGrupoProfissional(horarios, especialidadeId) {
+  const grupo = document.getElementById('modelo-grupo-profissional').content.cloneNode(true);
+  const profissional = profissionais.find((p) => p.id === horarios[0].profissionalId);
+  const nomeProfissional = profissional ? profissional.nome : 'Profissional';
+
+  grupo.querySelector('[data-campo="nome"]').textContent = nomeProfissional;
+  grupo.querySelector('[data-campo="clinica"]').textContent = `\u2022 ${nomeDaClinica(horarios[0].clinicaId)}`;
+
+  const lista = grupo.querySelector('[data-campo="horarios"]');
+  horarios.forEach((horario) => lista.appendChild(criarBotaoHorario(horario, nomeProfissional, especialidadeId)));
+
+  return grupo;
+}
+
+function criarBotaoHorario(horario, nomeProfissional, especialidadeId) {
+  const botao = document.getElementById('modelo-horario-agendar').content.querySelector('button').cloneNode(true);
+  botao.textContent = horario.horaInicio;
+  botao.setAttribute('aria-label', `Agendar com ${nomeProfissional} em ${formatarData(horario.data)} às ${horario.horaInicio}`);
+  botao.addEventListener('click', () => agendar(horario, nomeProfissional, especialidadeId, botao));
+  return botao;
+}
+
+async function carregarHorarios({ manterDiasAbertos = false } = {}) {
   const alerta = document.getElementById('alerta-agendar');
   ocultarAlerta(alerta);
   const container = document.getElementById('lista-horarios');
@@ -169,42 +339,38 @@ async function carregarHorarios() {
       return;
     }
 
-    const modelo = document.getElementById('modelo-horario');
+    const grupos = agruparPorDia(horarios);
+    if (!manterDiasAbertos) {
+      diasAbertos.clear();
+      diasAbertos.add(grupos.keys().next().value);
+    }
+
     container.innerHTML = '';
-    horarios.forEach((horario) => {
-      const item = modelo.content.cloneNode(true);
-      const profissional = profissionais.find((p) => p.id === horario.profissionalId);
-      const clinica = clinicas.find((c) => c.id === horario.clinicaId);
-
-      item.querySelector('[data-campo="profissional"]').textContent = profissional ? profissional.nome : 'Profissional';
-      item.querySelector('[data-campo="detalhes"]').textContent =
-        `${clinica ? clinica.nome : 'Clinica'} \u2022 ${formatarData(horario.data)} as ${horario.horaInicio}`;
-
-      item.querySelector('[data-acao="agendar"]').addEventListener('click', (evento) =>
-        agendar(horario.id, especialidadeId, evento.target)
-      );
-      container.appendChild(item);
-    });
+    grupos.forEach((horariosDoDia, data) => container.appendChild(criarGrupoDia(data, horariosDoDia, especialidadeId)));
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
     container.innerHTML = '';
   }
 }
 
-async function agendar(disponibilidadeId, especialidadeId, botao) {
+async function agendar(horario, nomeProfissional, especialidadeId, botao) {
+  const dataHora = `${formatarData(horario.data)} às ${horario.horaInicio}`;
+  if (!confirm(`Agendar consulta com ${nomeProfissional} em ${dataHora}?`)) return;
+
   const alerta = document.getElementById('alerta-agendar');
+  const textoOriginal = botao.textContent;
   botao.disabled = true;
   botao.textContent = 'Agendando...';
 
   try {
-    await api.criarAgendamento({ disponibilidadeId, especialidadeId: especialidadeId || null });
-    mostrarAlerta(alerta, 'Consulta agendada com sucesso! Confira em "Meus agendamentos".', 'sucesso');
-    await carregarHorarios();
+    await api.criarAgendamento({ disponibilidadeId: horario.id, especialidadeId: especialidadeId || null });
+    await carregarHorarios({ manterDiasAbertos: true });
     await carregarMeusAgendamentos();
+    mostrarAlerta(alerta, 'Consulta agendada com sucesso! Confira em "Meus agendamentos".', 'sucesso');
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
     botao.disabled = false;
-    botao.textContent = 'Agendar';
+    botao.textContent = textoOriginal;
   }
 }
 
@@ -242,10 +408,18 @@ async function carregarMeusAgendamentos() {
       selo.classList.add(agendamento.status === 'confirmado' ? 'selo-confirmado' : 'selo-cancelado');
 
       const btnCancelar = item.querySelector('[data-acao="cancelar"]');
-      if (agendamento.status === 'cancelado') {
-        btnCancelar.remove();
-      } else {
+      const prazo = item.querySelector('[data-campo="prazo"]');
+      if (agendamento.podeCancelar) {
+        prazo.textContent = `Você pode cancelar até ${formatarDataHora(agendamento.cancelavelAte)}.`;
         btnCancelar.addEventListener('click', () => cancelarAgendamento(agendamento.id));
+      } else {
+        btnCancelar.remove();
+        const consultaFutura = new Date(agendamento.dataHora) > new Date();
+        if (agendamento.status === 'confirmado' && consultaFutura) {
+          prazo.textContent = `O prazo para cancelar terminou em ${formatarDataHora(agendamento.cancelavelAte)}. Para alterar, fale com a clínica.`;
+        } else {
+          prazo.remove();
+        }
       }
 
       container.appendChild(item);
@@ -264,7 +438,7 @@ async function cancelarAgendamento(id) {
     await api.cancelarAgendamento(id);
     mostrarAlerta(alerta, 'Agendamento cancelado.', 'sucesso');
     await carregarMeusAgendamentos();
-    await carregarHorarios();
+    await carregarHorarios({ manterDiasAbertos: true });
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }

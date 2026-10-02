@@ -32,6 +32,7 @@
 
     <div class="abas" role="tablist">
       <button class="aba-btn ativa" data-aba="agendar" role="tab">Agendar consulta</button>
+      <button class="aba-btn" data-aba="clinicas" role="tab">Clínicas e especialidades</button>
       <button class="aba-btn" data-aba="meus" role="tab">Meus agendamentos</button>
       <button class="aba-btn" data-aba="perfil" role="tab">Meu perfil</button>
     </div>
@@ -88,6 +89,29 @@
     </section>
 
     
+    <section class="painel-aba" id="painel-clinicas">
+      <div class="cartao">
+        <h3>Clínicas</h3>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="busca-clinica-nome">Nome da clínica</label>
+            <input type="text" id="busca-clinica-nome" placeholder="Digite o nome..." />
+          </div>
+          <div class="campo">
+            <label for="busca-clinica-especialidade">Especialidade</label>
+            <select id="busca-clinica-especialidade"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div id="lista-clinicas"><p class="vazio">Carregando...</p></div>
+      </div>
+
+      <div class="cartao">
+        <h3>Especialidades</h3>
+        <div id="lista-especialidades"><p class="vazio">Carregando...</p></div>
+      </div>
+    </section>
+
+    
     <section class="painel-aba" id="painel-meus">
       <div class="alerta" id="alerta-meus" role="alert"></div>
       <div class="cartao">
@@ -128,16 +152,35 @@
   </div>
 </main>
 
-<template id="modelo-horario">
-  <div class="item-lista">
-    <div>
-      <div class="item-lista-titulo" data-campo="profissional"></div>
-      <div class="item-lista-meta" data-campo="detalhes"></div>
+<template id="modelo-dia-horarios">
+  <details class="grupo-dia">
+    <summary class="grupo-dia-cabecalho">
+      <div>
+        <div class="item-lista-titulo grupo-dia-titulo">
+          <span data-campo="dia"></span> <span class="grupo-dia-semana" data-campo="semana"></span>
+        </div>
+        <div class="item-lista-meta" data-campo="detalhes"></div>
+      </div>
+      <div class="grupo-dia-resumo">
+        <span class="selo selo-disponivel" data-campo="total"></span>
+      </div>
+    </summary>
+    <div data-campo="profissionais"></div>
+  </details>
+</template>
+
+<template id="modelo-grupo-profissional">
+  <div class="grupo-profissional">
+    <div class="grupo-profissional-nome">
+      <span data-campo="nome"></span>
+      <span class="grupo-profissional-clinica" data-campo="clinica"></span>
     </div>
-    <div class="item-lista-acoes">
-      <button class="btn btn-acento btn-pequeno" data-acao="agendar">Agendar</button>
-    </div>
+    <div class="grupo-dia-horarios" data-campo="horarios"></div>
   </div>
+</template>
+
+<template id="modelo-horario-agendar">
+  <button type="button" class="horario-agendar"></button>
 </template>
 
 <template id="modelo-agendamento">
@@ -145,6 +188,7 @@
     <div>
       <div class="item-lista-titulo" data-campo="profissional"></div>
       <div class="item-lista-meta" data-campo="detalhes"></div>
+      <div class="item-lista-meta" data-campo="prazo"></div>
     </div>
     <div class="item-lista-acoes">
       <span class="selo" data-campo="selo"></span>
@@ -161,6 +205,34 @@
     </div>
     <div class="item-lista-acoes">
       <button class="btn btn-secundario btn-pequeno" data-acao="ver-horarios">Ver horarios</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-clinica">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="endereco"></div>
+      <div class="item-lista-meta" data-campo="contato"></div>
+      <div class="item-lista-meta" data-campo="funcionamento"></div>
+      <div class="item-lista-meta" data-campo="especialidades"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <button class="btn btn-secundario btn-pequeno" data-acao="ver-profissionais">Ver profissionais</button>
+    </div>
+  </div>
+</template>
+
+<template id="modelo-especialidade">
+  <div class="item-lista">
+    <div>
+      <div class="item-lista-titulo" data-campo="nome"></div>
+      <div class="item-lista-meta" data-campo="descricao"></div>
+      <div class="item-lista-meta" data-campo="profissionais"></div>
+    </div>
+    <div class="item-lista-acoes">
+      <button class="btn btn-secundario btn-pequeno" data-acao="ver-profissionais">Ver profissionais</button>
     </div>
   </div>
 </template>

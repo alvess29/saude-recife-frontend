@@ -1,4 +1,4 @@
-import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora } from './auth-guard.js';
+import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, nomeDiaSemana, textoContagem } from './auth-guard.js';
 import { api } from './api.js';
 
 let perfilAtual = null;
@@ -228,24 +228,6 @@ async function gerarHorarios(evento) {
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }
-}
-
-function agruparPorDia(horarios) {
-  const grupos = new Map();
-  horarios.forEach((horario) => {
-    if (!grupos.has(horario.data)) grupos.set(horario.data, []);
-    grupos.get(horario.data).push(horario);
-  });
-  return grupos;
-}
-
-function nomeDiaSemana(dataIso) {
-  const [ano, mes, dia] = dataIso.split('-').map(Number);
-  return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', { weekday: 'long' });
-}
-
-function textoContagem(quantidade, singular, plural) {
-  return `${quantidade} ${quantidade === 1 ? singular : plural}`;
 }
 
 function criarGrupoDia(data, horariosDoDia) {
