@@ -83,8 +83,49 @@
           </div>
           <div class="linha-campos">
             <div class="campo"><label for="p-registro">Registro profissional</label><input type="text" id="p-registro" required placeholder="Ex: CRM 12345" /></div>
-            <div class="campo"><label for="p-conselho">Conselho</label><input type="text" id="p-conselho" required placeholder="CRM, CRO, COREN..." /></div>
-            <div class="campo"><label for="p-uf">UF do registro</label><input type="text" id="p-uf" maxlength="2" placeholder="PE" /></div>
+            <div class="campo"><label for="p-conselho">Conselho</label><select id="p-conselho" required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="CRM">CRM (Medicina)</option>
+                <option value="COREN">COREN (Enfermagem)</option>
+                <option value="CRO">CRO (Odontologia)</option>
+                <option value="CRF">CRF (Farmácia)</option>
+                <option value="CRP">CRP (Psicologia)</option>
+                <option value="CREFITO">CREFITO (Fisioterapia e Terapia Ocupacional)</option>
+                <option value="CRN">CRN (Nutrição)</option>
+                <option value="CRFa">CRFa (Fonoaudiologia)</option>
+                <option value="CRBM">CRBM (Biomedicina)</option>
+                <option value="CREF">CREF (Educação Física)</option>
+                <option value="CRESS">CRESS (Serviço Social)</option>
+              </select></div>
+            <div class="campo"><label for="p-uf">UF do registro</label><select id="p-uf">
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE" selected>PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+              </select></div>
           </div>
           <div class="linha-campos">
             <div class="campo"><label for="p-telefone">Telefone</label><input type="tel" id="p-telefone" /></div>

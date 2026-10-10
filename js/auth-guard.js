@@ -85,9 +85,31 @@ export function agruparPorDia(horarios) {
   return grupos;
 }
 
-export function nomeDiaSemana(dataISO) {
+export function partesDaData(dataISO) {
   const [ano, mes, dia] = dataISO.split('-').map(Number);
-  return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', { weekday: 'long' });
+  const data = new Date(ano, mes - 1, dia);
+  const capitalizar = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1);
+  return {
+    dia,
+    mesAbreviado: data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
+    semana: capitalizar(data.toLocaleDateString('pt-BR', { weekday: 'long' })),
+    mesAno: capitalizar(data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })),
+  };
+}
+
+export function renderizarGruposPorDia(container, grupos, criarGrupo) {
+  let mesAnterior = '';
+  grupos.forEach((itens, data) => {
+    const mes = data.slice(0, 7);
+    if (mes !== mesAnterior) {
+      const rotulo = document.createElement('div');
+      rotulo.className = 'grupo-mes';
+      rotulo.textContent = partesDaData(data).mesAno;
+      container.appendChild(rotulo);
+      mesAnterior = mes;
+    }
+    container.appendChild(criarGrupo(itens, data));
+  });
 }
 
 export function textoContagem(quantidade, singular, plural) {

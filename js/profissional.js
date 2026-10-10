@@ -1,4 +1,4 @@
-import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, nomeDiaSemana, textoContagem } from './auth-guard.js';
+import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, partesDaData, renderizarGruposPorDia, textoContagem } from './auth-guard.js';
 import { api } from './api.js';
 
 let perfilAtual = null;
@@ -230,7 +230,7 @@ async function gerarHorarios(evento) {
   }
 }
 
-function criarGrupoDia(data, horariosDoDia) {
+function criarGrupoDia(horariosDoDia, data) {
   const grupo = document.getElementById('modelo-dia-horarios').content.cloneNode(true);
   const detalhes = grupo.querySelector('details');
   const disponiveis = horariosDoDia.filter((h) => h.status === 'disponivel').length;
@@ -242,8 +242,12 @@ function criarGrupoDia(data, horariosDoDia) {
   const primeiro = horariosDoDia[0];
   const ultimo = horariosDoDia[horariosDoDia.length - 1];
 
+  const partes = partesDaData(data);
+
+  grupo.querySelector('[data-campo="numero"]').textContent = partes.dia;
+  grupo.querySelector('[data-campo="mes"]').textContent = partes.mesAbreviado;
+  grupo.querySelector('[data-campo="semana"]').textContent = partes.semana;
   grupo.querySelector('[data-campo="dia"]').textContent = formatarData(data);
-  grupo.querySelector('[data-campo="semana"]').textContent = nomeDiaSemana(data);
   grupo.querySelector('[data-campo="detalhes"]').textContent =
     `${primeiro.horaInicio} às ${ultimo.horaFim} \u2022 ${nomesClinicas.join(', ')}`;
 
@@ -305,7 +309,7 @@ function renderizarHorarios() {
   primeiraListagem = false;
 
   container.innerHTML = '';
-  grupos.forEach((horariosDoDia, data) => container.appendChild(criarGrupoDia(data, horariosDoDia)));
+  renderizarGruposPorDia(container, grupos, criarGrupoDia);
 }
 
 async function carregarHorarios() {

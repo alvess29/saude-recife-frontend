@@ -1,4 +1,4 @@
-import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, nomeDiaSemana, textoContagem } from './auth-guard.js';
+import { protegerPagina, mostrarAlerta, ocultarAlerta, formatarData, formatarDataHora, agruparPorDia, partesDaData, renderizarGruposPorDia, textoContagem } from './auth-guard.js';
 import { api } from './api.js';
 
 let clinicas = [];
@@ -271,16 +271,21 @@ function agruparPorProfissional(horarios) {
   return grupos;
 }
 
-function criarGrupoDia(data, horariosDoDia, especialidadeId) {
+function criarGrupoDia(horariosDoDia, data, especialidadeId) {
   const grupo = document.getElementById('modelo-dia-horarios').content.cloneNode(true);
   const detalhes = grupo.querySelector('details');
   const porProfissional = agruparPorProfissional(horariosDoDia);
   const nomesClinicas = [...new Set(horariosDoDia.map((h) => nomeDaClinica(h.clinicaId)))];
-  const resumo = [nomesClinicas.join(', ')];
+  const inicio = horariosDoDia.reduce((menor, h) => (h.horaInicio < menor ? h.horaInicio : menor), '99:99');
+  const fim = horariosDoDia.reduce((maior, h) => (h.horaFim > maior ? h.horaFim : maior), '00:00');
+  const resumo = [`${inicio} às ${fim}`, nomesClinicas.join(', ')];
   if (porProfissional.size > 1) resumo.push(`${porProfissional.size} profissionais`);
+  const partes = partesDaData(data);
 
+  grupo.querySelector('[data-campo="numero"]').textContent = partes.dia;
+  grupo.querySelector('[data-campo="mes"]').textContent = partes.mesAbreviado;
+  grupo.querySelector('[data-campo="semana"]').textContent = partes.semana;
   grupo.querySelector('[data-campo="dia"]').textContent = formatarData(data);
-  grupo.querySelector('[data-campo="semana"]').textContent = nomeDiaSemana(data);
   grupo.querySelector('[data-campo="detalhes"]').textContent = resumo.join(' \u2022 ');
   grupo.querySelector('[data-campo="total"]').textContent = textoContagem(horariosDoDia.length, 'horário', 'horários');
 
@@ -346,7 +351,7 @@ async function carregarHorarios({ manterDiasAbertos = false } = {}) {
     }
 
     container.innerHTML = '';
-    grupos.forEach((horariosDoDia, data) => container.appendChild(criarGrupoDia(data, horariosDoDia, especialidadeId)));
+    renderizarGruposPorDia(container, grupos, (horariosDoDia, data) => criarGrupoDia(horariosDoDia, data, especialidadeId));
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
     container.innerHTML = '';

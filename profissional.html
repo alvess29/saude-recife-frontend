@@ -115,9 +115,13 @@
 <template id="modelo-dia-horarios">
   <details class="grupo-dia">
     <summary class="grupo-dia-cabecalho">
-      <div>
-        <div class="item-lista-titulo grupo-dia-titulo">
-          <span data-campo="dia"></span> <span class="grupo-dia-semana" data-campo="semana"></span>
+      <div class="dia-data" aria-hidden="true">
+        <span class="dia-data-numero" data-campo="numero"></span>
+        <span class="dia-data-mes" data-campo="mes"></span>
+      </div>
+      <div class="grupo-dia-info">
+        <div class="grupo-dia-titulo">
+          <span data-campo="semana"></span> <span class="grupo-dia-data-completa" data-campo="dia"></span>
         </div>
         <div class="item-lista-meta" data-campo="detalhes"></div>
       </div>
@@ -125,8 +129,11 @@
         <span class="selo selo-disponivel" data-campo="disponiveis"></span>
         <span class="selo selo-reservado" data-campo="reservados"></span>
       </div>
+      <span class="grupo-dia-seta" aria-hidden="true"></span>
     </summary>
-    <div class="grupo-dia-horarios" data-campo="horarios"></div>
+    <div class="grupo-dia-corpo">
+      <div class="grupo-dia-horarios" data-campo="horarios"></div>
+    </div>
   </details>
 </template>
 

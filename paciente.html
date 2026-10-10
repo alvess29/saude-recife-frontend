@@ -155,17 +155,22 @@
 <template id="modelo-dia-horarios">
   <details class="grupo-dia">
     <summary class="grupo-dia-cabecalho">
-      <div>
-        <div class="item-lista-titulo grupo-dia-titulo">
-          <span data-campo="dia"></span> <span class="grupo-dia-semana" data-campo="semana"></span>
+      <div class="dia-data" aria-hidden="true">
+        <span class="dia-data-numero" data-campo="numero"></span>
+        <span class="dia-data-mes" data-campo="mes"></span>
+      </div>
+      <div class="grupo-dia-info">
+        <div class="grupo-dia-titulo">
+          <span data-campo="semana"></span> <span class="grupo-dia-data-completa" data-campo="dia"></span>
         </div>
         <div class="item-lista-meta" data-campo="detalhes"></div>
       </div>
       <div class="grupo-dia-resumo">
         <span class="selo selo-disponivel" data-campo="total"></span>
       </div>
+      <span class="grupo-dia-seta" aria-hidden="true"></span>
     </summary>
-    <div data-campo="profissionais"></div>
+    <div class="grupo-dia-corpo" data-campo="profissionais"></div>
   </details>
 </template>
 
