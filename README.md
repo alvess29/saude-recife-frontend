@@ -41,6 +41,7 @@ frontend/
 | Consulta de Horários Disponíveis e Agendamento | `paciente.html` (só mostra horários de hoje em diante e que ainda não começaram). Os horários vêm em cartões por dia (data em destaque, faixa de horário, clínica e contagem, separados por mês) e, dentro do dia, agrupados por profissional e clínica; o primeiro dia abre por padrão e cada horário é um botão que pede confirmação antes de agendar |
 | Pré-triagem de Sintomas por IA | `paciente.html`, aba "Agendar consulta" &rarr; "Começar pré-triagem": chat que pergunta os sintomas e recomenda a especialidade |
 | Cancelamento de Agendamento | `paciente.html`, aba "Meus agendamentos": mostra até quando o cancelamento é permitido; depois do prazo (24 horas antes da consulta) o botão Cancelar some e o paciente é orientado a falar com a clínica |
+| Pesquisa e manutencao pelo administrador | `admin.html`: campo de pesquisa em cada lista (clinicas, profissionais, especialidades, pacientes e agendamentos), edicao de profissional (inclusive criar o login depois do cadastro, informando e-mail e senha) e botao de cancelar agendamento |
 | Gerenciamento de Agendamentos | abas "Meus agendamentos" / "Minha agenda" / "Agendamentos" (admin) |
 | Integracao Client-Server (API REST + JSON) | `js/api.js`, que consome as rotas do repositorio backend |
 | Interface Responsiva e Acessivel | CSS com foco visivel, alvos de toque >= 44px, layout fluido, `prefers-reduced-motion` |

@@ -253,6 +253,8 @@ legend { font-family: var(--fonte-titulo); font-size: 1.1rem; color: var(--cor-p
 .selo-cancelado { background: var(--cor-perigo-fundo); color: var(--cor-perigo); }
 .selo-neutro { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); }
 
+.busca-lista { max-width: 420px; margin-bottom: 1rem; }
+
 .grupo-mes {
   margin: 1.1rem 0 0.45rem;
   color: var(--cor-texto-suave);

@@ -52,6 +52,7 @@ export const api = {
   
   listarProfissionais: () => chamar('/profissionais'),
   criarProfissional: (dados) => chamar('/profissionais', { metodo: 'POST', corpo: dados }),
+  atualizarProfissional: (id, dados) => chamar(`/profissionais/${id}`, { metodo: 'PUT', corpo: dados }),
   removerProfissional: (id) => chamar(`/profissionais/${id}`, { metodo: 'DELETE' }),
   removerProfissionalDefinitivo: (id) => chamar(`/profissionais/${id}/permanente`, { metodo: 'DELETE' }),
   ativarProfissional: (id) => chamar(`/profissionais/${id}`, { metodo: 'PUT', corpo: { ativo: true } }),

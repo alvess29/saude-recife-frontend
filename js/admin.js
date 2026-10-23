@@ -5,20 +5,37 @@ let clinicas = [];
 let profissionais = [];
 let especialidades = [];
 let pacientes = [];
+let agendamentos = [];
 let pacienteEmEdicaoId = null;
+let profissionalEmEdicaoId = null;
 
 iniciar();
+
+function semAcento(texto) {
+  return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function filtrarPorTexto(lista, idBusca, textoDe) {
+  const termo = semAcento(document.getElementById(idBusca).value.trim());
+  return termo ? lista.filter((item) => semAcento(textoDe(item)).includes(termo)) : lista;
+}
 
 async function iniciar() {
   await protegerPagina(['administrador']);
   configurarAbas();
 
   document.getElementById('form-clinica').addEventListener('submit', criarClinica);
-  document.getElementById('form-profissional').addEventListener('submit', criarProfissional);
+  document.getElementById('form-profissional').addEventListener('submit', salvarProfissional);
+  document.getElementById('botao-cancelar-edicao-profissional').addEventListener('click', cancelarEdicaoProfissional);
   document.getElementById('form-especialidade').addEventListener('submit', criarEspecialidade);
   document.getElementById('form-paciente').addEventListener('submit', salvarPaciente);
   document.getElementById('botao-cancelar-edicao-paciente').addEventListener('click', cancelarEdicaoPaciente);
   document.getElementById('form-administrador').addEventListener('submit', criarAdministrador);
+  document.getElementById('busca-clinicas').addEventListener('input', renderizarClinicas);
+  document.getElementById('busca-profissionais').addEventListener('input', renderizarProfissionais);
+  document.getElementById('busca-especialidades').addEventListener('input', renderizarEspecialidades);
+  document.getElementById('busca-pacientes').addEventListener('input', renderizarPacientes);
+  document.getElementById('busca-agendamentos').addEventListener('input', renderizarAgendamentos);
 
   await carregarEspecialidades();
   await carregarClinicas();
@@ -51,9 +68,14 @@ function renderizarClinicas() {
     container.innerHTML = '<div class="vazio"><strong>Nenhuma clinica cadastrada</strong>Use o formulario acima para comecar.</div>';
     return;
   }
+  const exibidas = filtrarPorTexto(clinicas, 'busca-clinicas', (c) => c.nome);
+  if (!exibidas.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhuma clinica encontrada</strong>Tente outro nome.</div>';
+    return;
+  }
   const modelo = document.getElementById('modelo-clinica');
   container.innerHTML = '';
-  clinicas.forEach((c) => {
+  exibidas.forEach((c) => {
     const item = modelo.content.cloneNode(true);
     const nomesEspecialidades = (c.especialidadeIds || [])
       .map((id) => especialidades.find((e) => e.id === id)?.nome)
@@ -113,9 +135,14 @@ function renderizarEspecialidades() {
     container.innerHTML = '<div class="vazio"><strong>Nenhuma especialidade cadastrada</strong></div>';
     return;
   }
+  const exibidas = filtrarPorTexto(especialidades, 'busca-especialidades', (e) => e.nome);
+  if (!exibidas.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhuma especialidade encontrada</strong>Tente outro nome.</div>';
+    return;
+  }
   const modelo = document.getElementById('modelo-especialidade');
   container.innerHTML = '';
-  especialidades.forEach((e) => {
+  exibidas.forEach((e) => {
     const item = modelo.content.cloneNode(true);
     item.querySelector('[data-campo="nome"]').textContent = e.nome;
     item.querySelector('[data-campo="detalhes"]').textContent = e.descricao || '';
@@ -160,16 +187,23 @@ function renderizarProfissionais() {
     container.innerHTML = '<div class="vazio"><strong>Nenhum profissional cadastrado</strong></div>';
     return;
   }
+  const exibidas = filtrarPorTexto(profissionais, 'busca-profissionais', (p) => p.nome);
+  if (!exibidas.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum profissional encontrado</strong>Tente outro nome.</div>';
+    return;
+  }
   const modelo = document.getElementById('modelo-profissional');
   container.innerHTML = '';
-  profissionais.forEach((p) => {
+  exibidas.forEach((p) => {
     const item = modelo.content.cloneNode(true);
     const nomesEspecialidades = (p.especialidadeIds || [])
       .map((id) => especialidades.find((e) => e.id === id)?.nome)
       .filter(Boolean)
       .join(', ');
     item.querySelector('[data-campo="nome"]').textContent = p.nome;
-    item.querySelector('[data-campo="detalhes"]').textContent = `${p.conselho} ${p.registroProfissional} \u2022 ${nomesEspecialidades || 'sem especialidade definida'}`;
+    const semLogin = p.uid ? '' : ' \u2022 sem login de acesso';
+    item.querySelector('[data-campo="detalhes"]').textContent = `${p.conselho} ${p.registroProfissional} \u2022 ${nomesEspecialidades || 'sem especialidade definida'}${semLogin}`;
+    item.querySelector('[data-acao="editar"]').addEventListener('click', () => editarProfissional(p.id));
     const selo = item.querySelector('[data-campo="selo"]');
     selo.textContent = p.ativo === false ? 'Inativo' : 'Ativo';
     selo.classList.add(p.ativo === false ? 'selo-cancelado' : 'selo-disponivel');
@@ -185,6 +219,114 @@ function renderizarProfissionais() {
 
     container.appendChild(item);
   });
+}
+
+function salvarProfissional(evento) {
+  return profissionalEmEdicaoId ? atualizarProfissional(evento) : criarProfissional(evento);
+}
+
+function definirSelect(id, valorSelecionado) {
+  const select = document.getElementById(id);
+  if (valorSelecionado && !Array.from(select.options).some((o) => o.value === valorSelecionado)) {
+    select.append(new Option(valorSelecionado, valorSelecionado));
+  }
+  select.value = valorSelecionado || '';
+}
+
+function marcarOpcoes(id, valoresMarcados) {
+  Array.from(document.getElementById(id).options).forEach((o) => {
+    o.selected = valoresMarcados.includes(o.value);
+  });
+}
+
+function editarProfissional(id) {
+  const profissional = profissionais.find((p) => p.id === id);
+  if (!profissional) return;
+
+  profissionalEmEdicaoId = id;
+  document.getElementById('p-nome').value = profissional.nome || '';
+  document.getElementById('p-cpf').value = formatarCpf(profissional.cpf || '');
+  document.getElementById('p-registro').value = profissional.registroProfissional || '';
+  definirSelect('p-conselho', profissional.conselho);
+  definirSelect('p-uf', profissional.ufRegistro || 'PE');
+  document.getElementById('p-telefone').value = profissional.telefone || '';
+  document.getElementById('p-email').value = profissional.email || '';
+  document.getElementById('p-senha').value = '';
+  marcarOpcoes('p-especialidades', profissional.especialidadeIds || []);
+  marcarOpcoes('p-clinicas', profissional.clinicaIds || []);
+
+  const ajuda = document.getElementById('ajuda-p-senha');
+  const temLogin = Boolean(profissional.uid);
+  document.getElementById('p-cpf').disabled = true;
+  document.getElementById('p-email').disabled = temLogin;
+  document.getElementById('grupo-p-senha').style.display = temLogin ? 'none' : 'block';
+  document.querySelector('label[for="p-senha"]').textContent = 'Senha de acesso (cria o login)';
+  ajuda.style.display = temLogin ? 'none' : 'block';
+  ajuda.textContent = 'Este profissional ainda nao tem login. Informe o e-mail e uma senha para criar o acesso.';
+
+  document.getElementById('titulo-form-profissional').textContent = `Editando: ${profissional.nome}`;
+  document.getElementById('botao-form-profissional').textContent = 'Salvar alteracoes';
+  document.getElementById('botao-cancelar-edicao-profissional').style.display = 'inline-flex';
+  document.getElementById('form-profissional').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelarEdicaoProfissional() {
+  profissionalEmEdicaoId = null;
+  document.getElementById('form-profissional').reset();
+  document.getElementById('p-cpf').disabled = false;
+  document.getElementById('p-email').disabled = false;
+  document.getElementById('grupo-p-senha').style.display = 'block';
+  document.querySelector('label[for="p-senha"]').textContent = 'Senha de acesso (opcional)';
+  document.getElementById('ajuda-p-senha').style.display = 'none';
+  document.getElementById('titulo-form-profissional').textContent = 'Novo profissional de saúde';
+  document.getElementById('botao-form-profissional').textContent = 'Cadastrar profissional';
+  document.getElementById('botao-cancelar-edicao-profissional').style.display = 'none';
+  ocultarAlerta(document.getElementById('alerta-profissional'));
+}
+
+async function atualizarProfissional(evento) {
+  evento.preventDefault();
+  const alerta = document.getElementById('alerta-profissional');
+  const profissional = profissionais.find((p) => p.id === profissionalEmEdicaoId);
+  const criarLogin = !profissional.uid && document.getElementById('p-senha').value !== '';
+  const senha = document.getElementById('p-senha').value;
+  const email = valor('p-email');
+
+  if (criarLogin && !email) {
+    mostrarAlerta(alerta, 'Informe o e-mail do profissional para criar o login.', 'erro');
+    return;
+  }
+
+  const dados = {
+    nome: valor('p-nome'),
+    registroProfissional: valor('p-registro'),
+    conselho: valor('p-conselho'),
+    ufRegistro: valor('p-uf'),
+    telefone: valor('p-telefone'),
+    especialidadeIds: selecionados('p-especialidades'),
+    clinicaIds: selecionados('p-clinicas'),
+  };
+  if (!profissional.uid) dados.email = email;
+
+  try {
+    await api.atualizarProfissional(profissionalEmEdicaoId, dados);
+
+    if (criarLogin) {
+      try {
+        await api.registrarEquipe({ nome: dados.nome, email, senha, tipoUsuario: 'profissional', profissionalId: profissionalEmEdicaoId });
+      } catch (erroLogin) {
+        mostrarAlerta(alerta, `Dados salvos, mas o login nao foi criado: ${erroLogin.message}`, 'erro');
+        await carregarProfissionais();
+        return;
+      }
+    }
+
+    cancelarEdicaoProfissional();
+    mostrarAlerta(alerta, criarLogin ? 'Profissional atualizado e login criado com sucesso.' : 'Profissional atualizado com sucesso.', 'sucesso');
+    await carregarProfissionais();
+  } catch (erro) {
+    mostrarAlerta(alerta, erro.message, 'erro');
+  }
 }
 
 async function criarProfissional(evento) {
@@ -243,23 +385,33 @@ async function carregarPacientes() {
 
   try {
     pacientes = await api.listarPacientes();
-    if (!pacientes.length) {
-      container.innerHTML = '<div class="vazio"><strong>Nenhum paciente cadastrado ainda</strong></div>';
-      return;
-    }
-    const modelo = document.getElementById('modelo-paciente');
-    container.innerHTML = '';
-    pacientes.forEach((p) => {
-      const item = modelo.content.cloneNode(true);
-      item.querySelector('[data-campo="nome"]').textContent = p.nome;
-      item.querySelector('[data-campo="detalhes"]').textContent =
-        `${p.email} \u2022 ${p.telefone || 'sem telefone'} \u2022 CPF ${formatarCpf(p.cpf)}`;
-      item.querySelector('[data-acao="editar"]').addEventListener('click', () => editarPaciente(p.uid));
-      container.appendChild(item);
-    });
+    renderizarPacientes();
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }
+}
+
+function renderizarPacientes() {
+  const container = document.getElementById('lista-pacientes');
+  if (!pacientes.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum paciente cadastrado ainda</strong></div>';
+    return;
+  }
+  const exibidos = filtrarPorTexto(pacientes, 'busca-pacientes', (p) => `${p.nome} ${p.email} ${p.cpf}`);
+  if (!exibidos.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum paciente encontrado</strong>Tente outro nome, e-mail ou CPF.</div>';
+    return;
+  }
+  const modelo = document.getElementById('modelo-paciente');
+  container.innerHTML = '';
+  exibidos.forEach((p) => {
+    const item = modelo.content.cloneNode(true);
+    item.querySelector('[data-campo="nome"]').textContent = p.nome;
+    item.querySelector('[data-campo="detalhes"]').textContent =
+      `${p.email} \u2022 ${p.telefone || 'sem telefone'} \u2022 CPF ${formatarCpf(p.cpf)}`;
+    item.querySelector('[data-acao="editar"]').addEventListener('click', () => editarPaciente(p.uid));
+    container.appendChild(item);
+  });
 }
 
 function editarPaciente(uid) {
@@ -366,32 +518,67 @@ async function carregarAgendamentos() {
   const container = document.getElementById('lista-agendamentos-admin');
 
   try {
-    const agendamentos = await api.listarAgendamentos();
-    if (!agendamentos.length) {
-      container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento ainda</strong></div>';
-      return;
-    }
-    const modelo = document.getElementById('modelo-agendamento-admin');
-    container.innerHTML = '';
-    agendamentos
-      .sort((a, b) => b.dataHora.localeCompare(a.dataHora))
-      .forEach((a) => {
-        const item = modelo.content.cloneNode(true);
-        const profissional = profissionais.find((p) => p.id === a.profissionalId);
-        const clinica = clinicas.find((c) => c.id === a.clinicaId);
-        const especialidade = especialidades.find((e) => e.id === a.especialidadeId);
-        item.querySelector('[data-campo="paciente"]').textContent = a.pacienteNome || 'Paciente';
-        item.querySelector('[data-campo="detalhes"]').textContent = [
-          profissional ? profissional.nome : 'Profissional',
-          especialidade ? especialidade.nome : null,
-          clinica ? clinica.nome : 'Clinica',
-          formatarDataHora(a.dataHora),
-        ].filter(Boolean).join(' \u2022 ');
-        const selo = item.querySelector('[data-campo="selo"]');
-        selo.textContent = a.status === 'confirmado' ? 'Confirmado' : 'Cancelado';
-        selo.classList.add(a.status === 'confirmado' ? 'selo-confirmado' : 'selo-cancelado');
-        container.appendChild(item);
-      });
+    agendamentos = await api.listarAgendamentos();
+    agendamentos.sort((a, b) => b.dataHora.localeCompare(a.dataHora));
+    renderizarAgendamentos();
+  } catch (erro) {
+    mostrarAlerta(alerta, erro.message, 'erro');
+  }
+}
+
+function descreverAgendamento(a) {
+  const profissional = profissionais.find((p) => p.id === a.profissionalId);
+  const clinica = clinicas.find((c) => c.id === a.clinicaId);
+  const especialidade = especialidades.find((e) => e.id === a.especialidadeId);
+  return {
+    paciente: a.pacienteNome || 'Paciente',
+    detalhes: [
+      profissional ? profissional.nome : 'Profissional',
+      especialidade ? especialidade.nome : null,
+      clinica ? clinica.nome : 'Clinica',
+      formatarDataHora(a.dataHora),
+    ].filter(Boolean).join(' \u2022 '),
+  };
+}
+
+function renderizarAgendamentos() {
+  const container = document.getElementById('lista-agendamentos-admin');
+  if (!agendamentos.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento ainda</strong></div>';
+    return;
+  }
+  const exibidos = filtrarPorTexto(agendamentos, 'busca-agendamentos', (a) => {
+    const { paciente, detalhes } = descreverAgendamento(a);
+    return `${paciente} ${detalhes}`;
+  });
+  if (!exibidos.length) {
+    container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento encontrado</strong>Tente outro nome de paciente, profissional ou clinica.</div>';
+    return;
+  }
+  const modelo = document.getElementById('modelo-agendamento-admin');
+  container.innerHTML = '';
+  exibidos.forEach((a) => {
+    const item = modelo.content.cloneNode(true);
+    const { paciente, detalhes } = descreverAgendamento(a);
+    item.querySelector('[data-campo="paciente"]').textContent = paciente;
+    item.querySelector('[data-campo="detalhes"]').textContent = detalhes;
+    const selo = item.querySelector('[data-campo="selo"]');
+    selo.textContent = a.status === 'confirmado' ? 'Confirmado' : 'Cancelado';
+    selo.classList.add(a.status === 'confirmado' ? 'selo-confirmado' : 'selo-cancelado');
+    const botao = item.querySelector('[data-acao="cancelar"]');
+    if (a.podeCancelar) botao.addEventListener('click', () => cancelarAgendamentoAdmin(a.id));
+    else botao.remove();
+    container.appendChild(item);
+  });
+}
+
+async function cancelarAgendamentoAdmin(id) {
+  const alerta = document.getElementById('alerta-agendamentos');
+  if (!confirm('Cancelar este agendamento? O horario volta a ficar disponivel.')) return;
+  try {
+    await api.cancelarAgendamento(id);
+    await carregarAgendamentos();
+    mostrarAlerta(alerta, 'Agendamento cancelado.', 'sucesso');
   } catch (erro) {
     mostrarAlerta(alerta, erro.message, 'erro');
   }

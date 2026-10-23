@@ -67,6 +67,7 @@
       </div>
       <div class="cartao">
         <h3>Clinicas cadastradas</h3>
+        <input type="search" id="busca-clinicas" class="busca-lista" placeholder="Pesquisar clinica por nome..." aria-label="Pesquisar clinicas por nome" />
         <div id="lista-clinicas"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -74,7 +75,7 @@
     
     <section class="painel-aba" id="painel-profissionais">
       <div class="cartao">
-        <h3>Novo profissional de saúde</h3>
+        <h3 id="titulo-form-profissional">Novo profissional de saúde</h3>
         <div class="alerta" id="alerta-profissional" role="alert"></div>
         <form id="form-profissional">
           <div class="linha-campos">
@@ -131,9 +132,10 @@
             <div class="campo"><label for="p-telefone">Telefone</label><input type="tel" id="p-telefone" /></div>
             <div class="campo"><label for="p-email">E-mail</label><input type="email" id="p-email" /></div>
           </div>
-          <div class="campo">
+          <div class="campo" id="grupo-p-senha">
             <label for="p-senha">Senha de acesso (opcional)</label>
             <input type="password" id="p-senha" minlength="6" />
+            <p class="ajuda" id="ajuda-p-senha" style="display:none;"></p>
           </div>
           <div class="linha-campos">
             <div class="campo">
@@ -146,11 +148,13 @@
               <select id="p-clinicas" multiple size="4"></select>
             </div>
           </div>
-          <button type="submit" class="btn btn-primario">Cadastrar profissional</button>
+          <button type="submit" class="btn btn-primario" id="botao-form-profissional">Cadastrar profissional</button>
+          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-profissional" style="display:none;">Cancelar edicao</button>
         </form>
       </div>
       <div class="cartao">
         <h3>Profissionais cadastrados</h3>
+        <input type="search" id="busca-profissionais" class="busca-lista" placeholder="Pesquisar profissional por nome..." aria-label="Pesquisar profissionais por nome" />
         <div id="lista-profissionais"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -170,6 +174,7 @@
       </div>
       <div class="cartao">
         <h3>Especialidades cadastradas</h3>
+        <input type="search" id="busca-especialidades" class="busca-lista" placeholder="Pesquisar especialidade por nome..." aria-label="Pesquisar especialidades por nome" />
         <div id="lista-especialidades"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -212,6 +217,7 @@
       <div class="alerta" id="alerta-pacientes" role="alert"></div>
       <div class="cartao">
         <h3>Pacientes cadastrados</h3>
+        <input type="search" id="busca-pacientes" class="busca-lista" placeholder="Pesquisar por nome, e-mail ou CPF..." aria-label="Pesquisar pacientes por nome, e-mail ou CPF" />
         <div id="lista-pacientes"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -236,6 +242,7 @@
       <div class="alerta" id="alerta-agendamentos" role="alert"></div>
       <div class="cartao">
         <h3>Todos os agendamentos</h3>
+        <input type="search" id="busca-agendamentos" class="busca-lista" placeholder="Pesquisar por paciente, profissional ou clinica..." aria-label="Pesquisar agendamentos" />
         <div id="lista-agendamentos-admin"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -265,6 +272,7 @@
     </div>
     <div class="item-lista-acoes">
       <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-secundario btn-pequeno" data-acao="editar">Editar</button>
       <button class="btn btn-secundario btn-pequeno" data-acao="alternar-status"></button>
       <button class="btn btn-perigo btn-pequeno" data-acao="excluir">Excluir</button>
     </div>
@@ -303,7 +311,10 @@
       <div class="item-lista-titulo" data-campo="paciente"></div>
       <div class="item-lista-meta" data-campo="detalhes"></div>
     </div>
-    <span class="selo" data-campo="selo"></span>
+    <div class="item-lista-acoes">
+      <span class="selo" data-campo="selo"></span>
+      <button class="btn btn-perigo btn-pequeno" data-acao="cancelar">Cancelar</button>
+    </div>
   </div>
 </template>
 
