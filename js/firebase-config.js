@@ -8,4 +8,8 @@ export const firebaseConfig = {
   measurementId: "G-FYL9FYRGZ6"
 };
 
-export const API_BASE_URL = 'http://localhost:3000/api';
+const emDesenvolvimento = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+export const API_BASE_URL = emDesenvolvimento
+  ? 'http://localhost:3000/api'
+  : 'https://COLE-AQUI-A-URL-DO-RENDER.onrender.com/api';

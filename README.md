@@ -115,3 +115,12 @@ ela cobre todos os requisitos da 1ª Entrega nos dois repositorios:
 5. O administrador pode editar os dados de um paciente a qualquer momento
    pela aba **Pacientes**, e criar outras contas de administrador pela aba
    **Administradores**.
+
+## Publicar no Netlify
+
+1. No Netlify, crie um site a partir do repositorio `saude-recife-frontend` (branch `main`).
+2. Deixe o **Build command** vazio e use `.` como **Publish directory** (o `index.html` fica na raiz do repositorio).
+3. Em `js/firebase-config.js`, troque o endereco `https://COLE-AQUI-A-URL-DO-RENDER.onrender.com/api` pela URL publica do backend e envie ao GitHub. Localmente (`localhost`) o sistema continua usando `http://localhost:3000/api`.
+4. No Console do Firebase, em Authentication > Settings > Authorized domains, adicione o dominio do site (ex.: `saude-recife.netlify.app`). Sem isso o login falha.
+5. No Render, preencha `CORS_ORIGINS` com o endereco do site.
+
