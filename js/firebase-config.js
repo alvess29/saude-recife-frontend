@@ -12,4 +12,4 @@ const emDesenvolvimento = ['localhost', '127.0.0.1'].includes(window.location.ho
 
 export const API_BASE_URL = emDesenvolvimento
   ? 'http://localhost:3000/api'
-  : 'https://COLE-AQUI-A-URL-DO-RENDER.onrender.com/api';
+  : 'https://saude-recife-backend-q15q.onrender.com/api';
