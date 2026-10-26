@@ -33,6 +33,7 @@ export const api = {
   atualizarPerfil: (dados) => chamar('/auth/perfil', { metodo: 'PUT', corpo: dados }),
   listarPacientes: () => chamar('/auth/pacientes'),
   atualizarPaciente: (id, dados) => chamar(`/auth/pacientes/${id}`, { metodo: 'PUT', corpo: dados }),
+  excluirPaciente: (id) => chamar(`/auth/pacientes/${id}`, { metodo: 'DELETE' }),
 
   
   listarClinicas: () => chamar('/clinicas'),

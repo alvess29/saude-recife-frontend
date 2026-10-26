@@ -1,4 +1,4 @@
-const CACHE = 'saude-recife-v14';
+const CACHE = 'saude-recife-v15';
 
 self.addEventListener('install', () => {
   self.skipWaiting();

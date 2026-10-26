@@ -254,6 +254,8 @@ legend { font-family: var(--fonte-titulo); font-size: 1.1rem; color: var(--cor-p
 .selo-neutro { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); }
 
 .busca-lista { max-width: 420px; margin-bottom: 1rem; }
+.opcao-lista { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--cor-texto-suave); cursor: pointer; }
+.opcao-lista input { width: auto; min-height: 0; }
 
 .grupo-mes {
   margin: 1.1rem 0 0.45rem;

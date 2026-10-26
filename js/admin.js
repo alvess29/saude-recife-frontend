@@ -6,6 +6,7 @@ let profissionais = [];
 let especialidades = [];
 let pacientes = [];
 let agendamentos = [];
+const DIAS_VISIVEIS_APOS_CONSULTA = 7;
 let pacienteEmEdicaoId = null;
 let profissionalEmEdicaoId = null;
 
@@ -36,6 +37,7 @@ async function iniciar() {
   document.getElementById('busca-especialidades').addEventListener('input', renderizarEspecialidades);
   document.getElementById('busca-pacientes').addEventListener('input', renderizarPacientes);
   document.getElementById('busca-agendamentos').addEventListener('input', renderizarAgendamentos);
+  document.getElementById('mostrar-agendamentos-antigos').addEventListener('change', renderizarAgendamentos);
 
   await carregarEspecialidades();
   await carregarClinicas();
@@ -265,7 +267,7 @@ function editarProfissional(id) {
   ajuda.textContent = 'Este profissional ainda nao tem login. Informe o e-mail e uma senha para criar o acesso.';
 
   document.getElementById('titulo-form-profissional').textContent = `Editando: ${profissional.nome}`;
-  document.getElementById('botao-form-profissional').textContent = 'Salvar alteracoes';
+  document.getElementById('botao-form-profissional').textContent = 'Salvar alterações';
   document.getElementById('botao-cancelar-edicao-profissional').style.display = 'inline-flex';
   document.getElementById('form-profissional').scrollIntoView({ behavior: 'smooth' });
 }
@@ -391,6 +393,24 @@ async function carregarPacientes() {
   }
 }
 
+async function excluirPaciente(paciente) {
+  const alerta = document.getElementById('alerta-pacientes');
+  const aviso = `Excluir ${paciente.nome}? A conta de acesso e o cadastro serao removidos, e as consultas confirmadas futuras serao canceladas. Esta acao nao pode ser desfeita.`;
+  if (!confirm(aviso)) return;
+
+  try {
+    const resposta = await api.excluirPaciente(paciente.uid);
+    if (pacienteEmEdicaoId === paciente.uid) cancelarEdicaoPaciente();
+    await Promise.all([carregarPacientes(), carregarAgendamentos()]);
+    const cancelados = resposta.agendamentosCancelados
+      ? ` ${resposta.agendamentosCancelados} consulta(s) futura(s) cancelada(s).`
+      : '';
+    mostrarAlerta(alerta, `Paciente excluido com sucesso.${cancelados}`, 'sucesso');
+  } catch (erro) {
+    mostrarAlerta(alerta, erro.message, 'erro');
+  }
+}
+
 function renderizarPacientes() {
   const container = document.getElementById('lista-pacientes');
   if (!pacientes.length) {
@@ -410,6 +430,7 @@ function renderizarPacientes() {
     item.querySelector('[data-campo="detalhes"]').textContent =
       `${p.email} \u2022 ${p.telefone || 'sem telefone'} \u2022 CPF ${formatarCpf(p.cpf)}`;
     item.querySelector('[data-acao="editar"]').addEventListener('click', () => editarPaciente(p.uid));
+    item.querySelector('[data-acao="excluir"]').addEventListener('click', () => excluirPaciente(p));
     container.appendChild(item);
   });
 }
@@ -432,7 +453,7 @@ function editarPaciente(uid) {
   document.getElementById('grupo-pa-senha').style.display = 'none';
 
   document.getElementById('titulo-form-paciente').textContent = `Editando: ${paciente.nome}`;
-  document.getElementById('botao-form-paciente').textContent = 'Salvar alteracoes';
+  document.getElementById('botao-form-paciente').textContent = 'Salvar alterações';
   document.getElementById('botao-cancelar-edicao-paciente').style.display = 'inline-flex';
   document.getElementById('form-paciente').scrollIntoView({ behavior: 'smooth' });
 }
@@ -462,8 +483,8 @@ async function salvarPaciente(evento) {
         sexo: document.getElementById('pa-sexo').value,
         observacoes: valor('pa-observacoes'),
       });
-      mostrarAlerta(alerta, 'Paciente atualizado com sucesso.', 'sucesso');
       cancelarEdicaoPaciente();
+      mostrarAlerta(alerta, 'Paciente atualizado com sucesso.', 'sucesso');
     } else {
       const senha = document.getElementById('pa-senha').value;
       if (!senha) {
@@ -547,12 +568,20 @@ function renderizarAgendamentos() {
     container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento ainda</strong></div>';
     return;
   }
-  const exibidos = filtrarPorTexto(agendamentos, 'busca-agendamentos', (a) => {
+  const mostrarAntigos = document.getElementById('mostrar-agendamentos-antigos').checked;
+  const limite = new Date(Date.now() - DIAS_VISIVEIS_APOS_CONSULTA * 24 * 60 * 60 * 1000);
+  const recentes = mostrarAntigos ? agendamentos : agendamentos.filter((a) => new Date(a.dataHora) >= limite);
+  const ocultos = agendamentos.length - recentes.length;
+  document.getElementById('aviso-agendamentos-ocultos').textContent = ocultos
+    ? `${ocultos} agendamento(s) com mais de ${DIAS_VISIVEIS_APOS_CONSULTA} dias desde a consulta estao ocultos. Marque "Mostrar agendamentos antigos" para ve-los.`
+    : '';
+
+  const exibidos = filtrarPorTexto(recentes, 'busca-agendamentos', (a) => {
     const { paciente, detalhes } = descreverAgendamento(a);
     return `${paciente} ${detalhes}`;
   });
   if (!exibidos.length) {
-    container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento encontrado</strong>Tente outro nome de paciente, profissional ou clinica.</div>';
+    container.innerHTML = '<div class="vazio"><strong>Nenhum agendamento encontrado</strong>Tente outro termo de busca ou marque "Mostrar agendamentos antigos".</div>';
     return;
   }
   const modelo = document.getElementById('modelo-agendamento-admin');

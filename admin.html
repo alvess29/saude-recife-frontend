@@ -149,7 +149,7 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primario" id="botao-form-profissional">Cadastrar profissional</button>
-          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-profissional" style="display:none;">Cancelar edicao</button>
+          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-profissional" style="display:none;">Cancelar edição</button>
         </form>
       </div>
       <div class="cartao">
@@ -194,24 +194,24 @@
             <div class="campo"><label for="pa-telefone">Telefone</label><input type="tel" id="pa-telefone" /></div>
           </div>
           <div class="campo" id="grupo-pa-senha">
-            <label for="pa-senha">Senha provisoria</label>
+            <label for="pa-senha">Senha provisória</label>
             <input type="password" id="pa-senha" minlength="6" />
           </div>
           <div class="linha-campos">
             <div class="campo"><label for="pa-nascimento">Data de nascimento</label><input type="date" id="pa-nascimento" /></div>
             <div class="campo">
-              <label for="pa-sexo">Sexo</label>
+              <label for="pa-sexo">Gênero</label>
               <select id="pa-sexo">
-                <option value="">Nao informar</option>
+                <option value="">Prefiro não informar</option>
                 <option value="feminino">Feminino</option>
                 <option value="masculino">Masculino</option>
                 <option value="outro">Outro</option>
               </select>
             </div>
           </div>
-          <div class="campo"><label for="pa-observacoes">Observacoes de saude</label><input type="text" id="pa-observacoes" /></div>
+          <div class="campo"><label for="pa-observacoes">Observações de saúde</label><input type="text" id="pa-observacoes" /></div>
           <button type="submit" class="btn btn-primario" id="botao-form-paciente">Cadastrar paciente</button>
-          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-paciente" style="display:none;">Cancelar edicao</button>
+          <button type="button" class="btn btn-secundario" id="botao-cancelar-edicao-paciente" style="display:none;">Cancelar edição</button>
         </form>
       </div>
       <div class="alerta" id="alerta-pacientes" role="alert"></div>
@@ -231,7 +231,7 @@
         <form id="form-administrador">
           <div class="campo"><label for="ad-nome">Nome</label><input type="text" id="ad-nome" required /></div>
           <div class="campo"><label for="ad-email">E-mail</label><input type="email" id="ad-email" required /></div>
-          <div class="campo"><label for="ad-senha">Senha provisoria</label><input type="password" id="ad-senha" required minlength="6" /></div>
+          <div class="campo"><label for="ad-senha">Senha provisória</label><input type="password" id="ad-senha" required minlength="6" /></div>
           <button type="submit" class="btn btn-primario btn-bloco">Criar conta</button>
         </form>
       </div>
@@ -243,6 +243,8 @@
       <div class="cartao">
         <h3>Todos os agendamentos</h3>
         <input type="search" id="busca-agendamentos" class="busca-lista" placeholder="Pesquisar por paciente, profissional ou clinica..." aria-label="Pesquisar agendamentos" />
+        <label class="opcao-lista"><input type="checkbox" id="mostrar-agendamentos-antigos" /> Mostrar agendamentos antigos</label>
+        <p class="ajuda" id="aviso-agendamentos-ocultos"></p>
         <div id="lista-agendamentos-admin"><p class="vazio">Carregando...</p></div>
       </div>
     </section>
@@ -301,6 +303,7 @@
     </div>
     <div class="item-lista-acoes">
       <button class="btn btn-secundario btn-pequeno" data-acao="editar">Editar</button>
+      <button class="btn btn-perigo btn-pequeno" data-acao="excluir">Excluir</button>
     </div>
   </div>
 </template>
